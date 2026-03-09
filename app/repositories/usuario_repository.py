@@ -7,7 +7,7 @@ class UsuarioRepository:
         self.db = db
 
     def create(self, data: UsuarioCreate):
-        usuario = Usuario(**data.model_dump)
+        usuario = Usuario(**data.model_dump())
         self.db.add(usuario)
         self.db.commit()
         self.db.refresh(usuario)
@@ -22,3 +22,4 @@ class UsuarioRepository:
     def delete_usuario_by_id(self, id: str):
         usuario = self.get_usuario_by_id(id)
         self.db.delete(usuario)
+        self.db.commit()

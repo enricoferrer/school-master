@@ -24,7 +24,7 @@ def list_usuarios(service: UsuarioService = Depends(get_service)):
 def get_usuario_by_id(id: str, service: UsuarioService = Depends(get_service)):
     return service.get_usuario_by_id(id)
 
-@router.delete("/{id}")
+@router.delete("/{id}", status_code=204)
 def delete_usuario_by_id(id: str, service: UsuarioService = Depends(get_service)):
     service.delete_usuario_by_id(id)
 

@@ -1,6 +1,7 @@
 from uuid import uuid4
 from sqlalchemy import Column, String, UUID, Date
 from app.core.database import Base
+from sqlalchemy.orm import relationship
 
 class Usuario(Base):
     __tablename__ = 'usuarios'
@@ -15,3 +16,5 @@ class Usuario(Base):
     email = Column(String, nullable=False)
     telefone = Column(String)
     endereco = Column(String, nullable=False)
+    
+    funcionarios = relationship("Funcionario", back_populates="usuario", cascade="all, delete")
