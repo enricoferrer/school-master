@@ -7,12 +7,6 @@ from dotenv import load_dotenv
 from app.core.database import Base
 from app.models.usuario import Usuario
 from app.models.funcionario import Funcionario
-from app.models.professor import Professor
-from app.models.disciplina import Disciplina
-from app.models.professor_disciplina import ProfessorDisciplina
-from app.models.turma import Turma
-from app.models.turma_professor import TurmaProfessor
-from app.models.aluno import Aluno
 
 # Load environment variables from .env file
 load_dotenv()
