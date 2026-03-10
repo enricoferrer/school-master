@@ -13,3 +13,4 @@ class Funcionario(Base):
     cargo = Column(String, nullable=False)
     
     usuario = relationship("Usuario", back_populates="funcionarios", foreign_keys=[fk_usuario])
+    professores = relationship("Professor", back_populates="funcionario", cascade="all, delete")
