@@ -1,4 +1,5 @@
 from typing import List
+from urllib.error import HTTPError
 
 from fastapi import APIRouter, Depends
 from app.schemas.usuario import UsuarioResponse, UsuarioCreate
@@ -6,6 +7,7 @@ from app.core.database import get_db
 from app.services.usuario_service import UsuarioService
 from app.repositories.usuario_repository import UsuarioRepository
 from sqlalchemy.orm import Session
+from app.exceptions import NotFoundException
 
 router = APIRouter(prefix="/usuarios", tags=["Usuários"])
 
@@ -22,7 +24,10 @@ def list_usuarios(service: UsuarioService = Depends(get_service)):
 
 @router.get("/{id}", response_model=UsuarioResponse)
 def get_usuario_by_id(id: str, service: UsuarioService = Depends(get_service)):
-    return service.get_usuario_by_id(id)
+    try:
+        return service.get_usuario_by_id(id)
+    except NotFoundException as e:
+        raise HTTPError(404, detail=str(e))
 
 @router.delete("/{id}", status_code=204)
 def delete_usuario_by_id(id: str, service: UsuarioService = Depends(get_service)):

@@ -1,5 +1,7 @@
 from app.repositories.usuario_repository import UsuarioRepository
 from app.schemas.usuario import UsuarioCreate
+from app.exceptions import NotFoundException
+from uuid import UUID
 
 class UsuarioService():
     def __init__(self, repository: UsuarioRepository):
@@ -11,8 +13,12 @@ class UsuarioService():
     def list_usuarios(self):
         return self.repository.list_usuarios()
     
-    def get_usuario_by_id(self, id: str):
-        return self.repository.get_usuario_by_id(id)
+    def get_usuario_by_id(self, id: UUID):
+        usuario = self.repository.get_usuario_by_id(id)
+        if usuario is None:
+            raise NotFoundException(f"Usuario com o ID: '{id} não foi encontrado!")
+        return usuario
     
-    def delete_usuario_by_id(self, id: str):
-        self.repository.delete_usuario_by_id(id)
+    def delete_usuario_by_id(self, id: UUID):
+        usuario = self.get_usuario_by_id(id)
+        self.repository.delete_usuario(usuario)

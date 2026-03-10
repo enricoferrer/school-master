@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session
 from app.models.usuario import Usuario
 from app.schemas.usuario import UsuarioCreate
@@ -16,10 +18,9 @@ class UsuarioRepository:
     def list_usuarios(self):
         return self.db.query(Usuario).all()
 
-    def get_usuario_by_id(self, id: str):
+    def get_usuario_by_id(self, id: UUID):
         return self.db.query(Usuario).filter(Usuario.id == id).first()
     
-    def delete_usuario_by_id(self, id: str):
-        usuario = self.get_usuario_by_id(id)
+    def delete_usuario(self, usuario: Usuario):
         self.db.delete(usuario)
         self.db.commit()
