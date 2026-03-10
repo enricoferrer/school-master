@@ -21,7 +21,6 @@ class FuncionarioRepository:
     def get_funcionario_by_id(self, id: UUID):
         return self.db.query(Funcionario).filter(Funcionario.id == id).first()
     
-    def delete_funcionario_by_id(self, id: UUID):
-        funcionario = self.get_funcionario_by_id(id)
+    def delete_funcionario(self, funcionario: Funcionario):
         self.db.delete(funcionario)
         self.db.commit()

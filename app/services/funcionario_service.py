@@ -23,4 +23,5 @@ class FuncionarioService:
         return self.repository.list_all_funcionarios()
     
     def delete_funcionario(self, id: UUID):
-        self.repository.delete_funcionario_by_id(id)
+        funcionario = self.get_funcionario_by_id(id)
+        self.repository.delete_funcionario_by_id(funcionario)
