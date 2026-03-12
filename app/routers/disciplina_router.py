@@ -1,15 +1,14 @@
-from email.policy import default
-from http.client import HTTPException
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from app.core.database import get_db
 from app.schemas.disciplina import DisciplinaCreate, DisciplinaResponse
 from app.repositories.disciplina_repository import DisciplinaRepository
 from app.services.disciplina_service import DisciplinaService
 from sqlalchemy.orm import Session
-from app.exceptions import NotFoundException
+from app.exceptions.NotFoundException import NotFoundException
+from app.exceptions.DuplicateFieldException import DuplicateFieldException
 
 router = APIRouter(prefix="/disciplinas", tags=["Disciplina"])
 
@@ -18,7 +17,11 @@ def get_service(db: Session = Depends(get_db)):
 
 @router.post("/", response_model=DisciplinaResponse, status_code=201)
 def create_disciplina(data: DisciplinaCreate, service: DisciplinaService = Depends(get_service)):
-    return service.create(data)
+    try:
+        disciplina = service.create(data)
+        return disciplina
+    except DuplicateFieldException as e:
+        raise HTTPException(409, detail=str(e))
 
 @router.get("/", response_model=List[DisciplinaResponse])
 def list_disciplina(service: DisciplinaService = Depends(get_service)):

@@ -24,3 +24,6 @@ class DisciplinaRepository:
     def delete_disciplina(self, disciplina: Disciplina):
         self.db.delete(disciplina)
         self.db.commit()
+        
+    def get_disciplina_by_codigo(self, codigo: str):
+        return self.db.query(Disciplina).filter(Disciplina.codigo == codigo).first()
