@@ -2,11 +2,13 @@ from pydantic import BaseModel, EmailStr, field_validator
 from datetime import date
 from uuid import UUID
 from app.validators.usuario_validator import (
-    not_empty,
     nome_social_strip,
     validate_cpf,
     validate_telefone,
     validate_data_nascimento,
+)
+from app.validators.common_validator import (
+    not_empty
 )
 
 class UsuarioModel(BaseModel):

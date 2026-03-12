@@ -3,8 +3,10 @@ from datetime import date
 from uuid import UUID
 from app.schemas.usuario import UsuarioResponse
 from app.validators.funcionario_validator import (
-    not_empty,
     validate_matricula
+)
+from app.validators.common_validator import (
+    not_empty
 )
 
 class FuncionarioModel(BaseModel):

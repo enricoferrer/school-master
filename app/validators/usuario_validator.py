@@ -1,11 +1,6 @@
 from datetime import date
 import re
 
-def not_empty(v: str) -> str:
-    if not v or not v.strip():
-        raise ValueError("não pode ser vazio")
-    return v.strip()
-
 def nome_social_strip(v: str | None) -> str | None:
     if v is not None:
         return v.strip() or None
