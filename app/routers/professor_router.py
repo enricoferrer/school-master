@@ -1,12 +1,10 @@
-from http.client import HTTPException
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from app.core.database import get_db
 from app.repositories.professor_repository import ProfessorRepository
 from app.services.professor_service import ProfessorService
-from app.models.professor import Professor
 from app.schemas.professor import ProfessorCreate, ProfessorResponse
 from sqlalchemy.orm import Session
 from app.exceptions import NotFoundException

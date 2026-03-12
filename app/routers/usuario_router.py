@@ -1,7 +1,6 @@
 from typing import List
-from urllib.error import HTTPError
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from app.schemas.usuario import UsuarioResponse, UsuarioCreate
 from app.core.database import get_db
 from app.services.usuario_service import UsuarioService
@@ -27,7 +26,7 @@ def get_usuario_by_id(id: str, service: UsuarioService = Depends(get_service)):
     try:
         return service.get_usuario_by_id(id)
     except NotFoundException as e:
-        raise HTTPError(404, detail=str(e))
+        raise HTTPException(404, detail=str(e))
 
 @router.delete("/{id}", status_code=204)
 def delete_usuario_by_id(id: str, service: UsuarioService = Depends(get_service)):
