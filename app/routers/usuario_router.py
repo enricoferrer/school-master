@@ -7,6 +7,7 @@ from app.services.usuario_service import UsuarioService
 from app.repositories.usuario_repository import UsuarioRepository
 from sqlalchemy.orm import Session
 from app.exceptions.NotFoundException import NotFoundException
+from app.exceptions.DuplicateFieldException import DuplicateFieldException
 
 router = APIRouter(prefix="/usuarios", tags=["Usuários"])
 
@@ -15,7 +16,11 @@ def get_service(db: Session = Depends(get_db)):
 
 @router.post("/", response_model=UsuarioResponse, status_code=201)
 def create_usuario(data: UsuarioCreate, service: UsuarioService = Depends(get_service)):
-    return service.create(data)
+    try:
+        usuario = service.create(data)
+        return usuario
+    except DuplicateFieldException as e:
+        raise HTTPException(409, detail=str(e))
 
 @router.get("/", response_model=List[UsuarioResponse])
 def list_usuarios(service: UsuarioService = Depends(get_service)):

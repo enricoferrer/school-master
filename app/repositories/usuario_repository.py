@@ -24,3 +24,6 @@ class UsuarioRepository:
     def delete_usuario(self, usuario: Usuario):
         self.db.delete(usuario)
         self.db.commit()
+        
+    def get_usuario_by_cpf(self, cpf: str):
+        return self.db.query(Usuario).filter(Usuario.cpf == cpf).first()

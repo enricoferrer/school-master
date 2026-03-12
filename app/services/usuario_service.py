@@ -1,13 +1,17 @@
 from app.repositories.usuario_repository import UsuarioRepository
 from app.schemas.usuario import UsuarioCreate
-from app.exceptions import NotFoundException
+from app.exceptions.NotFoundException import NotFoundException
 from uuid import UUID
+from app.exceptions.DuplicateFieldException import DuplicateFieldException
 
 class UsuarioService():
     def __init__(self, repository: UsuarioRepository):
         self.repository = repository
         
     def create(self, data: UsuarioCreate):
+        usuarioDuplicado = self.repository.get_usuario_by_cpf(data.cpf)
+        if usuarioDuplicado:
+            raise DuplicateFieldException(f"Usuário com esse CPF já existe!")
         return self.repository.create(data)
     
     def list_usuarios(self):
