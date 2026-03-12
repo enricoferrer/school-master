@@ -27,3 +27,6 @@ class UsuarioRepository:
         
     def get_usuario_by_cpf(self, cpf: str):
         return self.db.query(Usuario).filter(Usuario.cpf == cpf).first()
+    
+    def get_usuario_by_rg(self, rg: str):
+        return self.db.query(Usuario).filter(Usuario.registro_geral == rg).first()

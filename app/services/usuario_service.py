@@ -9,9 +9,15 @@ class UsuarioService():
         self.repository = repository
         
     def create(self, data: UsuarioCreate):
-        usuarioDuplicado = self.repository.get_usuario_by_cpf(data.cpf)
-        if usuarioDuplicado:
+        usuarioDuplicadoCpf = self.repository.get_usuario_by_cpf(data.cpf)
+        usuarioDuplicadoRg = self.repository.get_usuario_by_rg(data.registro_geral)
+        
+        if usuarioDuplicadoCpf:
             raise DuplicateFieldException(f"Usuário com esse CPF já existe!")
+        
+        if usuarioDuplicadoRg:
+            raise DuplicateFieldException(f"Usuário com esse RG já existe!")
+        
         return self.repository.create(data)
     
     def list_usuarios(self):
