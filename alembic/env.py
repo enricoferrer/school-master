@@ -8,6 +8,7 @@ from app.core.database import Base
 from app.models.usuario import Usuario
 from app.models.funcionario import Funcionario
 from app.models.professor import Professor
+from app.models.disciplina import Disciplina
 
 # Load environment variables from .env file
 load_dotenv()
