@@ -6,7 +6,7 @@ from app.core.database import get_db
 from app.services.usuario_service import UsuarioService
 from app.repositories.usuario_repository import UsuarioRepository
 from sqlalchemy.orm import Session
-from app.exceptions import NotFoundException
+from app.exceptions.NotFoundException import NotFoundException
 
 router = APIRouter(prefix="/usuarios", tags=["Usuários"])
 

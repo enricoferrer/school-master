@@ -7,7 +7,7 @@ from app.core.database import get_db
 from app.repositories.funcionario_repository import FuncionarioRepository
 from app.services.funcionario_service import FuncionarioService
 from app.schemas.funcionarios import FuncionarioCreate, FuncionarioResponse
-from app.exceptions import NotFoundException
+from app.exceptions.NotFoundException import NotFoundException
 
 
 router = APIRouter(prefix="/funcionarios", tags=["Funcionarios"])

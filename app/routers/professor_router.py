@@ -7,7 +7,7 @@ from app.repositories.professor_repository import ProfessorRepository
 from app.services.professor_service import ProfessorService
 from app.schemas.professor import ProfessorCreate, ProfessorResponse
 from sqlalchemy.orm import Session
-from app.exceptions import NotFoundException
+from app.exceptions.NotFoundException import NotFoundException
 
 router = APIRouter(prefix="/professor", tags=["Professor"])
 
