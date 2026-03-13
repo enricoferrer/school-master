@@ -15,7 +15,7 @@ class ProfessorRepository:
         return professor
     
     def list_all_professor(self):
-        return self.db.query(Professor).all
+        return self.db.query(Professor).all()
     
     def get_professor_by_id(self, id: UUID):
         return self.db.query(Professor).filter(Professor.id == id).first()
