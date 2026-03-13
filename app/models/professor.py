@@ -10,5 +10,5 @@ class Professor(Base):
     carga_horaria = Column(Integer, nullable=False)
     fk_funcionario = Column(UUID, ForeignKey("funcionarios.id", ondelete="NO ACTION", onupdate="NO ACTION"), nullable=False)
     
-    funcionario = relationship("Funcionario", back_populates="professores", foreign_keys=[fk_funcionario])
+    funcionarios = relationship("Funcionario", back_populates="professores", foreign_keys=[fk_funcionario])
     
