@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 class Usuario(Base):
     __tablename__ = 'usuarios'
     
-    id = Column(UUID, primary_key=True, index=True, default=uuid4)
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid4)
     nome_completo = Column(String, nullable=False)
     nome_social = Column(String)
     data_nascimento = Column(Date, nullable=False)
@@ -17,4 +17,4 @@ class Usuario(Base):
     telefone = Column(String)
     endereco = Column(String, nullable=False)
     
-    funcionarios = relationship("Funcionario", back_populates="usuario", cascade="all, delete")
+    funcionario = relationship("Funcionario", back_populates="usuario", cascade="all, delete")
