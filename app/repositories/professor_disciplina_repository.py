@@ -17,7 +17,7 @@ class ProfessorDisciplinaRepository:
         return professor_disciplina
         
     def vinculo_existe(self, fk_disciplina: UUID, fk_professor: UUID) -> bool:
-        vinculo = self.db.query(ProfessorDisciplina).filter(ProfessorDisciplina.fk_disciplina == fk_disciplina & ProfessorDisciplina.fk_professor == fk_professor).first()
+        vinculo = self.db.query(ProfessorDisciplina).filter((ProfessorDisciplina.fk_disciplina == fk_disciplina) & (ProfessorDisciplina.fk_professor == fk_professor)).first()
         if vinculo:
             return True
         return False
@@ -29,7 +29,7 @@ class ProfessorDisciplinaRepository:
         return self.db.query(ProfessorDisciplina).filter(ProfessorDisciplina.fk_disciplina == fk_disciplina).all()
     
     def get_vinculo(self, fk_disciplina: UUID, fk_professor: UUID):
-        vinculo = self.db.query(ProfessorDisciplina).filter(ProfessorDisciplina.fk_disciplina == fk_disciplina & ProfessorDisciplina.fk_professor == fk_professor).first()
+        vinculo = self.db.query(ProfessorDisciplina).filter((ProfessorDisciplina.fk_disciplina == fk_disciplina) & (ProfessorDisciplina.fk_professor == fk_professor)).first()
         return vinculo
     
     def delete_vinculo(self, vinculo: ProfessorDisciplina):
