@@ -12,3 +12,4 @@ class Professor(Base):
 
     funcionario = relationship("Funcionario", back_populates="professor", foreign_keys=[fk_funcionario])
     professor_disciplinas = relationship("ProfessorDisciplina", back_populates="professor", cascade="all, delete-orphan")
+    turma_professores = relationship("TurmaProfessores", back_populates="professor", cascade="all, delete-orphan")

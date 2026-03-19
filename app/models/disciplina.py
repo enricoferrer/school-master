@@ -12,3 +12,4 @@ class Disciplina(Base):
     codigo = Column(String, nullable=False, unique=True)
 
     professor_disciplinas = relationship("ProfessorDisciplina", back_populates="disciplina", cascade="all, delete-orphan")
+    turma_professores = relationship("TurmaProfessores", back_populates="disciplina", cascade="all, delete-orphan")
