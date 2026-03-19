@@ -1,0 +1,33 @@
+from uuid import UUID
+
+from app.exceptions import DuplicateFieldException
+from app.exceptions.NotFoundException import NotFoundException
+from app.repositories.aluno_repository import AlunoRepository
+from app.schemas.aluno import AlunoCreate
+
+
+class AlunoService:
+    def __init__(self, repository: AlunoRepository):
+        self.repository = repository
+        
+    def create(self, data: AlunoCreate):
+        matricula_existe = self.repository.get_aluno_by_matricula(data.matricula)
+        if matricula_existe:
+            raise DuplicateFieldException("Um aluno com essa matricula já existe!")
+        return self.repository.create(data)
+    
+    def list_alunos(self):
+        return self.repository.list_alunos()
+    
+    def get_aluno_by_id(self, id: UUID):
+        aluno = self.repository.get_aluno_by_id(id)
+        if not aluno:
+            raise NotFoundException("Aluno com esse ID não foi encontrado")
+        return aluno
+    
+    def delete_aluno_by_id(self, id: UUID):
+        aluno = self.repository.get_aluno_by_id(id)
+        if not aluno:
+            raise NotFoundException("Aluno com esse ID não foi encontrado")
+        self.repository.delete_aluno(aluno)
+        
