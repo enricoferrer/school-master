@@ -20,6 +20,10 @@ class TurmaProfessoresRepository:
         vinculo = self.db.query(TurmaProfessores).filter(TurmaProfessores.id == id).first()
         return vinculo
     
+    def get_vinculo(self, id_turma: UUID, id_professor: UUID, id_disciplina):
+        vinculo = self.db.query(TurmaProfessores).filter((TurmaProfessores.fk_turma == id_turma) & (TurmaProfessores.fk_disciplina == id_disciplina) & (TurmaProfessores.fk_professor == id_professor)).first()
+        return vinculo
+    
     def delete_vinculo(self, vinculo: TurmaProfessores):
         self.db.delete(vinculo)
         self.db.commit()
