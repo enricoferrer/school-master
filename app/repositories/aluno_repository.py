@@ -2,7 +2,7 @@ from sqlalchemy import UUID
 from sqlalchemy.orm import Session
 
 from app.models.aluno import Aluno
-from app.schemas.aluno import AlunoResponse
+from app.schemas.aluno import AlunoResponse, AlunoUpdate
 
 
 class AlunoRepository:
@@ -28,3 +28,9 @@ class AlunoRepository:
         
     def get_aluno_by_matricula(self, matricula: str):
         return self.db.query(Aluno).filter(Aluno.matricula == matricula).first()
+    
+    def insert_aluno_turma(self, data_atualizar: AlunoUpdate):
+        self.db.query(Aluno).filter(Aluno.id == data_atualizar.id).update({Aluno.fk_turma: data_atualizar.fk_turma})
+        self.db.commit()
+        aluno = self.db.query(Aluno).filter(Aluno.id == data_atualizar.id).first()
+        return aluno

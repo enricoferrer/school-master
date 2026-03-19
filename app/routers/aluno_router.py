@@ -9,7 +9,7 @@ from app.core.database import get_db
 from app.exceptions.DuplicateFieldException import DuplicateFieldException
 from app.exceptions.NotFoundException import NotFoundException
 from app.repositories.aluno_repository import AlunoRepository
-from app.schemas.aluno import AlunoCreate, AlunoResponse
+from app.schemas.aluno import AlunoCreate, AlunoResponse, AlunoUpdate
 from app.services.aluno_service import AlunoService
 
 
@@ -35,6 +35,14 @@ def list_alunos(matricula: str = None, service: AlunoService = Depends(get_servi
         except NotFoundException as e:
             raise HTTPException(404, detail=str(e))
     return service.list_alunos()
+
+@router.patch("/update", response_model=AlunoResponse)
+def update_turma_aluno_by_id(data_atualizar: AlunoUpdate, service: AlunoService = Depends(get_service)):
+    try:
+        aluno_atualizado = service.update_turma_aluno(data_atualizar)
+        return aluno_atualizado
+    except NotFoundException as e:
+        raise HTTPException(404, detail=str(e))
 
 @router.get("/{id}", response_model=AlunoResponse)
 def get_aluno_by_id(id: UUID, service: AlunoService = Depends(get_service)):

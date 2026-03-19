@@ -3,7 +3,7 @@ from uuid import UUID
 from app.exceptions import DuplicateFieldException
 from app.exceptions.NotFoundException import NotFoundException
 from app.repositories.aluno_repository import AlunoRepository
-from app.schemas.aluno import AlunoCreate
+from app.schemas.aluno import AlunoCreate, AlunoUpdate
 
 
 class AlunoService:
@@ -35,4 +35,10 @@ class AlunoService:
         aluno = self.repository.get_aluno_by_matricula(matricula)
         if not aluno:
             raise NotFoundException("Aluno com essa matricula não foi encontrado")
+        return aluno
+    
+    def update_turma_aluno(self, data_atualizar: AlunoUpdate):
+        aluno = self.repository.insert_aluno_turma(data_atualizar)
+        if not aluno:
+            raise NotFoundException("Aluno não foi encontrado")
         return aluno

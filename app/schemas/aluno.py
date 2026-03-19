@@ -26,6 +26,10 @@ class AlunoBase(BaseModel):
     @classmethod
     def val_data_matricula(cls, v): return validate_data_matricula(v)
     
+class AlunoUpdate(BaseModel):
+    id: UUID
+    fk_turma: UUID
+    
 class AlunoCreate(AlunoBase):
     fk_turma: Optional[UUID] = None
     fk_usuario: UUID
