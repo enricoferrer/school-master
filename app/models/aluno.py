@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 from app.core.database import Base
 
 
-class Alunos(Base):
+class Aluno(Base):
     __tablename__ = "alunos"
     
     id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid4)
