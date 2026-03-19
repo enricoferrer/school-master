@@ -12,3 +12,4 @@ class Turma(Base):
     serie = Column(String)
     
     turma_professores = relationship("TurmaProfessores", back_populates="turma", cascade="all, delete-orphan")
+    aluno = relationship("Aluno", back_populates="turma", cascade="all, delete-orphan")

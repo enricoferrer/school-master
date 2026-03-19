@@ -18,3 +18,4 @@ class Usuario(Base):
     endereco = Column(String, nullable=False)
     
     funcionario = relationship("Funcionario", back_populates="usuario", cascade="all, delete")
+    aluno = relationship("Aluno", back_populates="usuario", cascade="all, delete-orphan")
