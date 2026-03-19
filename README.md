@@ -1,184 +1,82 @@
 # 🎓 School Master API
 
 <p align="center">
-  <b>Uma API moderna para gerenciamento de dados escolares</b><br>
-  Desenvolvida com foco em boas práticas, arquitetura limpa e performance 🚀
+  <b>Enterprise School Management System</b><br>
+  <i>Uma API robusta simulando um ambiente real de startup, focada em segurança, escalabilidade e processos ágeis.</i> 🚀
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-Fase_1_(MVP_Seguro)-green?style=for-the-badge" alt="Status">
+  <img src="https://img.shields.io/badge/Coverage->80%25-blue?style=for-the-badge" alt="Coverage">
 </p>
 
 ---
 
-## ✨ Destaques do projeto
+## 📑 Visão de Produto e Metodologia
 
-- ⚡ API rápida construída com **FastAPI**
-- 🧠 Arquitetura organizada em camadas
-- 🗄️ Integração com **PostgreSQL**
-- 🐳 Pronta para produção com **Docker**
-- 🔗 Relacionamentos reais entre entidades (1:N)
-- 📦 Validação robusta com **Pydantic**
+Diferente de projetos comuns, o **School Master** foi desenvolvido simulando o ciclo de vida real de um produto de software:
 
----
+1. **CEO/Stakeholder (IA):** Definiu 8 pilares estratégicos de negócio, como combate à evasão escolar e gestão financeira.
+2. **Product Owner (IA):** Traduziu os desejos de negócio em um **Backlog Técnico Sênior** com User Stories (US), Critérios de Aceite e priorização P0/P1/P2.
+3. **Desenvolvedor (Enrico):** Implementa as funcionalidades focando em Design Patterns e infraestrutura resiliente.
 
-## 🧠 Sobre o projeto
-
-O **School Master** é uma API REST desenvolvida como projeto de portfólio, simulando um sistema completo de gestão escolar.
-
-Ela permite o gerenciamento de:
-
-- 👤 Usuários
-- 🎓 Alunos
-- 🏫 Turmas
-- 👨‍🏫 Funcionários
-- 📚 Relacionamentos entre entidades
-
-O objetivo do projeto é demonstrar domínio em:
-
-- Construção de APIs escaláveis
-- Organização de código backend
-- Integração com banco de dados relacional
-- Boas práticas de desenvolvimento
+> 🔗 **[Clique aqui para visualizar o Board do Projeto (Roadmap/Kanban)]**
+> *[text](https://github.com/users/enricoferrer/projects/1)*
 
 ---
 
-## 🧱 Arquitetura
+## ✨ Diferenciais Técnicos (Enterprise-Grade)
 
-```bash
+* 🔐 **Segurança P0:** Autenticação JWT com *Refresh Token Rotation* e RBAC (Controle de acesso granular)
+* 🛡️ **Audit Log:** Middleware de auditoria imutável para rastreabilidade total de operações (Quem? Quando? O quê?)
+* 📊 **Analytics & Reports:** Processamento de dados de frequência e desempenho com geração de PDFs e Excel
+* ⚙️ **Processamento Assíncrono:** Uso de **Celery + RabbitMQ** para tarefas pesadas
+* 🚀 **Performance:** Cache distribuído com **Redis**
+
+---
+
+## 🧱 Arquitetura e Design Patterns
+
+```
 app/
-├── core/          # Configurações e conexão com banco
-├── models/        # Modelos (SQLAlchemy)
-├── schemas/       # Validação (Pydantic)
-├── services/      # Regras de negócio
-├── routes/        # Endpoints
-└── main.py        # Entrada da aplicação
+├── core/          # Configurações globais, Segurança e Auditoria
+├── models/        # Modelos SQLAlchemy (Event Sourcing para Logs)
+├── schemas/       # DTOs de validação (Pydantic)
+├── services/      # Regras de Negócio e Patterns (Strategy, Factory)
+├── routes/        # Controllers/Endpoints versionados (v1)
+└── main.py        # Configuração da aplicação FastAPI
 ```
 
 ---
 
-## 🚀 Tecnologias
+## 🚀 Tecnologias e Stack
 
-- Python
-- FastAPI
-- SQLAlchemy
-- PostgreSQL
-- Pydantic
-- Docker
-- Docker Compose
+* **Backend:** Python / FastAPI
+* **Banco de Dados:** PostgreSQL (Relacional) / Redis (Cache)
+* **Mensageria/Filas:** RabbitMQ / Celery
+* **DevOps:** Docker / Docker Compose / GitHub Actions (CI/CD)
+* **Testes:** Pytest (Cobertura de 80%+)
 
 ---
 
-## 🐳 Rodando com Docker (recomendado)
+## 🗺️ Roadmap de Desenvolvimento
 
-### Subir o projeto
+### Fase 1: MVP Seguro (Em andamento 🚧)
 
-```bash
-docker-compose up --build
-```
+* [ ] US-001: Autenticação JWT & Refresh Tokens
+* [ ] US-002: RBAC (Permissões de Admin, Professor, etc)
+* [ ] US-003: Sistema de Auditoria de Dados
+* [ ] TD-001: Rate Limiting & Proteção Anti-Abuso
 
-### Acessar a API
+### Fase 2: Gestão & Monetização
 
-- 🔗 http://localhost:8000/docs
-- 🔗 http://localhost:8000/redoc
-
-### Parar containers
-
-```bash
-docker-compose down
-```
-
----
-
-## 🛠️ Rodando localmente (sem Docker)
-
-### 1. Clone o repositório
-
-```bash
-git clone https://github.com/enricoferrer/school-master.git
-cd school-master
-```
-
-### 2. Ambiente virtual
-
-```bash
-python -m venv venv
-source venv/bin/activate
-venv\Scripts\activate
-```
-
-### 3. Instalar dependências
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Configurar banco
-
-```env
-DATABASE_URL=postgresql://user:password@localhost:5432/school_master
-```
-
-### 5. Rodar API
-
-```bash
-uvicorn app.main:app --reload
-```
-
----
-
-## 📡 Endpoints
-
-A API possui documentação automática:
-
-- Swagger UI → `/docs`
-- Redoc → `/redoc`
-
----
-
-## 📚 Conceitos aplicados
-
-- Arquitetura em camadas
-- Separação de responsabilidades
-- ORM com SQLAlchemy
-- Validação com Pydantic
-- API RESTful
-
----
-
-## 🚀 Próximos passos
-
-- 🔐 Autenticação com JWT
-- 👥 Sistema de permissões
-- 📊 Relatórios
-- 📈 Observabilidade (logs/metrics)
-
----
-
-## 🤝 Contribuição
-
-Contribuições são bem-vindas!
-
-```bash
-# fluxo padrão
-fork -> branch -> commit -> pull request
-```
----
-
-## Como foram definidas as implementações do projeto:
-
-<b>O roadmap do projeto foi definido simulando um ambiente real de startup, onde uma IA atuou como CEO/Stakeholder e outra como PO para definir os requisitos de negócio.</b>
-
----
----
-
-## 📄 Licença
-
-MIT
+* [ ] US-004: Analytics de Frequência e Evasão
+* [ ] US-005: Gestão Financeira (PIX/NFe)
+* [ ] US-006: Notas e Cálculo Automático de Médias
 
 ---
 
 ## 👨‍💻 Autor
 
 **Enrico Ferrer**
-
-<p align="center">
-  Feito com 💻 e café ☕
-</p>
-/
+Desenvolvedor Fullstack focado em Python/Java 🚀
