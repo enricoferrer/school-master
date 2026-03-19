@@ -159,7 +159,13 @@ Contribuições são bem-vindas!
 # fluxo padrão
 fork -> branch -> commit -> pull request
 ```
+---
 
+## Como foram definidas as implementações do projeto:
+
+<b>O roadmap do projeto foi definido simulando um ambiente real de startup, onde uma IA atuou como CEO/Stakeholder e outra como PO para definir os requisitos de negócio.</b>
+
+---
 ---
 
 ## 📄 Licença
@@ -175,3 +181,4 @@ MIT
 <p align="center">
   Feito com 💻 e café ☕
 </p>
+/
