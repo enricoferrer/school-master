@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, field_validator
@@ -26,10 +27,10 @@ class AlunoBase(BaseModel):
     def val_data_matricula(cls, v): return validate_data_matricula(v)
     
 class AlunoCreate(AlunoBase):
-    fk_turma: UUID
+    fk_turma: Optional[UUID] = None
     fk_usuario: UUID
 
 class AlunoResponse(AlunoBase):
     id: UUID
-    turma: TurmaResponse
+    turma: Optional[TurmaResponse] = None
     usuario: UsuarioResponse
