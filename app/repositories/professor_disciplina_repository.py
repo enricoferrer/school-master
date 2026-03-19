@@ -1,4 +1,3 @@
-from ast import Delete
 from uuid import UUID
 
 from sqlalchemy.orm import Session
