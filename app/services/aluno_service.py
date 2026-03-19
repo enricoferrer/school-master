@@ -31,3 +31,8 @@ class AlunoService:
             raise NotFoundException("Aluno com esse ID não foi encontrado")
         self.repository.delete_aluno(aluno)
         
+    def get_aluno_by_matricula(self, matricula: str):
+        aluno = self.repository.get_aluno_by_matricula(matricula)
+        if not aluno:
+            raise NotFoundException("Aluno com essa matricula não foi encontrado")
+        return aluno
