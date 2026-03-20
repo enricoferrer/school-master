@@ -1,12 +1,22 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
  
  
 class Settings(BaseSettings):
     DATABASE_URL: str
+    JWT_PRIVATE_KEY_PATH: str
+    JWT_PUBLIC_KEY_PATH: str
+    
+    @property
+    def JWT_PRIVATE_KEY(self):
+        return Path(self.JWT_PRIVATE_KEY_PATH).read_text()
+
+    @property
+    def JWT_PUBLIC_KEY(self):
+        return Path(self.JWT_PUBLIC_KEY_PATH).read_text()
  
     # Auth / JWT
-    JWT_PRIVATE_KEY: str
-    JWT_PUBLIC_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
  
