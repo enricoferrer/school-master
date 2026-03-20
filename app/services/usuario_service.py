@@ -1,3 +1,4 @@
+from app.core.security import hash_password
 from app.repositories.usuario_repository import UsuarioRepository
 from app.schemas.usuario import UsuarioCreate
 from app.exceptions.NotFoundException import NotFoundException
@@ -18,6 +19,9 @@ class UsuarioService():
         if usuarioDuplicadoRg:
             raise DuplicateFieldException(f"Usuário com esse RG já existe!")
         
+        senha_criptada = hash_password(data.senha_hash)
+        data.senha_hash = senha_criptada
+
         return self.repository.create(data)
     
     def list_usuarios(self):
