@@ -1,5 +1,4 @@
 version: "3.8"
-
 services:
   db:
     image: postgres:16-alpine
@@ -18,11 +17,27 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: schoolmaster_redis
+    command: redis-server --requirepass redispass --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redispass", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   app:
     build: .
     container_name: schoolmaster_app
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql+psycopg://user:password@db:5432/school_master
@@ -31,8 +46,10 @@ services:
       DB_USER: user
       DB_PASS: password
       DB_NAME: school_master
+      REDIS_URL: redis://:redispass@redis:6379/0
     ports:
       - "8000:8000"
 
 volumes:
   postgres_data:
+  redis_data:
