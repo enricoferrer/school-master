@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, field_validator
-from datetime import date
+from datetime import date, datetime
 from uuid import UUID
 from app.validators.usuario_validator import (
     nome_social_strip,
@@ -17,6 +17,7 @@ class UsuarioModel(BaseModel):
     data_nascimento: date
     cpf: str
     registro_geral: str
+    fk_role: UUID
     genero: str
     email: EmailStr
     endereco: str
@@ -44,9 +45,14 @@ class UsuarioModel(BaseModel):
 
 
 class UsuarioCreate(UsuarioModel):
-    pass
+    senha_hash: str
     
 class UsuarioResponse(UsuarioModel):
     id: UUID
+    tentativas_falhas: int = 0
+    bloqueado_ate: datetime | None = None
+    is_active: bool = True
+    criado_em: datetime | None = None
+    atualizado_em: datetime | None = None
     
     model_config = {'from_attributes': True}
