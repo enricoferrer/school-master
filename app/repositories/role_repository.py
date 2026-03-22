@@ -12,3 +12,8 @@ class RoleRepository:
         return await self.db.scalar(     
             select(Role).where(Role.id == role_id)
         )
+        
+    async def get_role_by_name(self, role_name: str) -> Role | None:
+        return await self.db.scalar(     
+            select(Role).where(Role.nome == role_name.upper())
+        )
