@@ -8,20 +8,20 @@ class FuncionarioService:
     def __init__(self, repository: FuncionarioRepository):
         self.repository = repository
         
-    def create(self, data: FuncionarioCreate):
-        return self.repository.create(data)
+    async def create(self, data: FuncionarioCreate):
+        return await self.repository.create(data)
     
-    def get_funcionario_by_id(self, id: UUID):
-        funcionario = self.repository.get_funcionario_by_id(id)
+    async def get_funcionario_by_id(self, id: UUID):
+        funcionario = await self.repository.get_funcionario_by_id(id)
         
         if funcionario is None:
             raise NotFoundException(f"Funcionario com o ID: `{id}` não foi encontrado!")
         
         return funcionario
     
-    def list_funcionario(self):
-        return self.repository.list_all_funcionarios()
+    async def list_funcionario(self):
+        return await self.repository.list_all_funcionarios()
     
-    def delete_funcionario(self, id: UUID):
-        funcionario = self.get_funcionario_by_id(id)
-        self.repository.delete_funcionario_by_id(funcionario)
+    async def delete_funcionario(self, id: UUID):
+        funcionario = await self.get_funcionario_by_id(id)
+        await self.repository.delete_funcionario(funcionario)
