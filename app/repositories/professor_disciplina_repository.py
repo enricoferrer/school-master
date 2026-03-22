@@ -1,36 +1,49 @@
 from uuid import UUID
 
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from app.schemas.professor_disciplina import ProfessorDisciplinaCreate
 from app.models.professor_disciplina import ProfessorDisciplina
 
 class ProfessorDisciplinaRepository:
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
         
-    def create(self, data: ProfessorDisciplinaCreate):
+    def _base_query(self):
+        return select(ProfessorDisciplina).options(
+            selectinload(ProfessorDisciplina.disciplina),
+            selectinload(ProfessorDisciplina.professor)
+        )
+        
+    async def create(self, data: ProfessorDisciplinaCreate):
         professor_disciplina = ProfessorDisciplina(**data.model_dump())
         self.db.add(professor_disciplina)
-        self.db.commit()
-        self.db.refresh(professor_disciplina)
+        await self.db.commit()
+        await self.db.refresh(professor_disciplina)
+        
+        result = await self.db.execute(self._base_query().where(ProfessorDisciplina.id == professor_disciplina.id))
+        
+        professor_disciplina = result.scalar_one()
+        
         return professor_disciplina
         
-    def vinculo_existe(self, fk_disciplina: UUID, fk_professor: UUID) -> bool:
-        vinculo = self.db.query(ProfessorDisciplina).filter((ProfessorDisciplina.fk_disciplina == fk_disciplina) & (ProfessorDisciplina.fk_professor == fk_professor)).first()
-        if vinculo:
-            return True
-        return False
+    async def vinculo_existe(self, fk_disciplina: UUID, fk_professor: UUID) -> bool:
+        result = await self.db.execute(self._base_query().where((ProfessorDisciplina.fk_disciplina == fk_disciplina) & (ProfessorDisciplina.fk_professor == fk_professor)))
+        return bool(result.scalar_one_or_none())
     
-    def list_disciplinas_do_professor(self, fk_professor: UUID):
-        return self.db.query(ProfessorDisciplina).filter(ProfessorDisciplina.fk_professor == fk_professor).all()
+    async def list_disciplinas_do_professor(self, fk_professor: UUID):
+        result = await self.db.execute(self._base_query().where(ProfessorDisciplina.fk_professor == fk_professor))
+        return result.scalars().all()
     
-    def list_professores_da_disciplina(self, fk_disciplina: UUID):
-        return self.db.query(ProfessorDisciplina).filter(ProfessorDisciplina.fk_disciplina == fk_disciplina).all()
+    async def list_professores_da_disciplina(self, fk_disciplina: UUID):
+        result = await self.db.execute(self._base_query().where(ProfessorDisciplina.fk_disciplina == fk_disciplina))
+        return result.scalars().all()
     
-    def get_vinculo(self, fk_disciplina: UUID, fk_professor: UUID):
-        vinculo = self.db.query(ProfessorDisciplina).filter((ProfessorDisciplina.fk_disciplina == fk_disciplina) & (ProfessorDisciplina.fk_professor == fk_professor)).first()
-        return vinculo
+    async def get_vinculo(self, fk_disciplina: UUID, fk_professor: UUID):
+        result = await self.db.execute(self._base_query().where((ProfessorDisciplina.fk_disciplina == fk_disciplina) & (ProfessorDisciplina.fk_professor == fk_professor)))
+        return result.scalar_one_or_none()
     
-    def delete_vinculo(self, vinculo: ProfessorDisciplina):
-        self.db.delete(vinculo)
-        self.db.commit()
+    async def delete_vinculo(self, vinculo: ProfessorDisciplina):
+        await self.db.delete(vinculo)
+        await self.db.commit()
