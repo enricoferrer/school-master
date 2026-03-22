@@ -1,29 +1,33 @@
+from sqlalchemy import select
 from uuid import UUID
 
-from sqlalchemy.orm import Session
 from app.schemas.disciplina import DisciplinaCreate
 from app.models.disciplina import Disciplina
+from sqlalchemy.ext.asyncio import AsyncSession
 
 class DisciplinaRepository:
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
     
-    def create(self, data: DisciplinaCreate):
+    async def create(self, data: DisciplinaCreate):
         disciplina = Disciplina(**data.model_dump())
         self.db.add(disciplina)
-        self.db.commit()
-        self.db.refresh(disciplina)
+        await self.db.commit()
+        await self.db.refresh(disciplina)
         return disciplina
     
-    def list_disciplina(self):
-        return self.db.query(Disciplina).all()
+    async def list_disciplina(self):
+        result = await self.db.execute(select(Disciplina))
+        return result.scalars().all()
     
-    def get_disciplina_by_id(self, id: UUID):
-        return self.db.query(Disciplina).filter(Disciplina.id == id).first()
+    async def get_disciplina_by_id(self, id: UUID):
+        result = await self.db.execute(select(Disciplina).where(Disciplina.id == id))
+        return result.scalar_one_or_none()
     
-    def delete_disciplina(self, disciplina: Disciplina):
-        self.db.delete(disciplina)
-        self.db.commit()
+    async def delete_disciplina(self, disciplina: Disciplina):
+        await self.db.delete(disciplina)
+        await self.db.commit()
         
-    def get_disciplina_by_codigo(self, codigo: str):
-        return self.db.query(Disciplina).filter(Disciplina.codigo == codigo).first()
+    async def get_disciplina_by_codigo(self, codigo: str):
+        result = await self.db.execute(select(Disciplina).where(Disciplina.codigo == codigo))
+        return result.scalar_one_or_none()

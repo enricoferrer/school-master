@@ -1,32 +1,34 @@
 from uuid import UUID
 
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.turma import Turma
 from app.schemas.turma import TurmaCreate
 
 
 class TurmaRepository:
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
         
-    def create(self, data: TurmaCreate):
+    async def create(self, data: TurmaCreate):
         turma = Turma(**data.model_dump())
         self.db.add(turma)
-        self.db.commit()
-        self.db.refresh(turma)
+        await self.db.commit()
+        await self.db.refresh(turma)
         return turma
     
-    def list_turmas(self):
-        return self.db.query(Turma).all()
+    async def list_turmas(self):
+        turmas = await self.db.execute(select(Turma))
+        return turmas.scalars().all()
     
-    def get_turma_by_id(self, id: UUID):
-        return self.db.query(Turma).filter(Turma.id == id).first()
+    async def get_turma_by_id(self, id: UUID):
+        return await self.db.scalar(select(Turma).where(Turma.id == id))
     
-    def turma_existe(self, sala: str, serie: str) -> bool:
-        turma = self.db.query(Turma).filter((Turma.sala == sala) & (Turma.serie == serie)).first()
+    async def turma_existe(self, sala: str, serie: str) -> bool:
+        turma = await self.db.scalar(select(Turma).where((Turma.sala == sala) & (Turma.serie == serie)))
         return bool(turma)
     
-    def delete_turma(self, turma: Turma):
-        self.db.delete(turma)
-        self.db.commit()
+    async def delete_turma(self, turma: Turma):
+        await self.db.delete(turma)
+        await self.db.commit()

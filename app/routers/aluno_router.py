@@ -2,10 +2,10 @@ from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
-from passlib import exc
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.dependencies.auth import require_permission
 from app.exceptions.DuplicateFieldException import DuplicateFieldException
 from app.exceptions.NotFoundException import NotFoundException
 from app.repositories.aluno_repository import AlunoRepository
@@ -15,46 +15,46 @@ from app.services.aluno_service import AlunoService
 
 router = APIRouter(prefix="/alunos", tags=["Alunos"])
 
-def get_service(db: Session = Depends(get_db)):
+def get_service(db: AsyncSession = Depends(get_db)):
     return AlunoService(AlunoRepository(db))
 
-@router.post("/", response_model=AlunoResponse, status_code=201)
-def create(data: AlunoCreate, service: AlunoService = Depends(get_service)):
+@router.post("/", response_model=AlunoResponse, status_code=201, dependencies=[Depends(require_permission("aluno:write"))])
+async def create(data: AlunoCreate, service: AlunoService = Depends(get_service)):
     try:
-        aluno = service.create(data)
+        aluno = await service.create(data)
         return aluno
     except DuplicateFieldException as e:
         raise HTTPException(409, detail=str(e))
     
-@router.get("/", response_model=List[AlunoResponse])    
-def list_alunos(matricula: str = None, service: AlunoService = Depends(get_service)):
+@router.get("/", response_model=List[AlunoResponse], dependencies=[Depends(require_permission("aluno:read"))])    
+async def list_alunos(matricula: str = None, service: AlunoService = Depends(get_service)):
     if matricula:
         try:
-            aluno = service.get_aluno_by_matricula(matricula)
+            aluno = await service.get_aluno_by_matricula(matricula)
             return [aluno]
         except NotFoundException as e:
             raise HTTPException(404, detail=str(e))
-    return service.list_alunos()
+    return await service.list_alunos()
 
-@router.patch("/update", response_model=AlunoResponse)
-def update_turma_aluno_by_id(data_atualizar: AlunoUpdate, service: AlunoService = Depends(get_service)):
+@router.patch("/update", response_model=AlunoResponse, dependencies=[Depends(require_permission("aluno:write"))])
+async def update_turma_aluno_by_id(data_atualizar: AlunoUpdate, service: AlunoService = Depends(get_service)):
     try:
-        aluno_atualizado = service.update_turma_aluno(data_atualizar)
+        aluno_atualizado = await service.update_turma_aluno(data_atualizar)
         return aluno_atualizado
     except NotFoundException as e:
         raise HTTPException(404, detail=str(e))
 
-@router.get("/{id}", response_model=AlunoResponse)
-def get_aluno_by_id(id: UUID, service: AlunoService = Depends(get_service)):
+@router.get("/{id}", response_model=AlunoResponse, dependencies=[Depends(require_permission("aluno:read"))])
+async def get_aluno_by_id(id: UUID, service: AlunoService = Depends(get_service)):
     try:
-        aluno = service.get_aluno_by_id(id)
+        aluno = await service.get_aluno_by_id(id)
         return aluno
     except NotFoundException as e:
         raise HTTPException(404, detail=str(e))
     
-@router.delete("/{id}", status_code=204)
-def delete_aluno_by_id(id: UUID, service: AlunoService = Depends(get_service)):
+@router.delete("/{id}", status_code=204, dependencies=[Depends(require_permission("aluno:write"))])
+async def delete_aluno_by_id(id: UUID, service: AlunoService = Depends(get_service)):
     try:
-        service.delete_aluno_by_id(id)
+        await service.delete_aluno_by_id(id)
     except NotFoundException as e:
         raise HTTPException(404, detail=str(e))
