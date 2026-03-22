@@ -10,24 +10,24 @@ class TurmaService:
     def __init__(self, repository: TurmaRepository):
         self.repository = repository
         
-    def create(self, data: TurmaCreate):
-        turma_existe = self.repository.turma_existe(data.sala, data.serie)
+    async def create(self, data: TurmaCreate):
+        turma_existe = await self.repository.turma_existe(data.sala, data.serie)
         
         if turma_existe:
             raise DuplicateEntityException("Essa turma já está cadastrada")
-        return self.repository.create(data)
+        return await self.repository.create(data)
     
-    def list_turmas(self):
-        return self.repository.list_turmas()
+    async def list_turmas(self):
+        return await self.repository.list_turmas()
     
-    def get_turma_by_id(self, id: UUID):
-        turma = self.repository.get_turma_by_id(id)
+    async def get_turma_by_id(self, id: UUID):
+        turma = await self.repository.get_turma_by_id(id)
         if not turma:
             raise NotFoundException("Turma não encontrada com esses parametros")
         return turma
     
-    def delete_turma_by_id(self, id: UUID):
-        turma = self.repository.get_turma_by_id(id)
+    async def delete_turma_by_id(self, id: UUID):
+        turma = await self.repository.get_turma_by_id(id)
         if not turma:
             raise NotFoundException("Turma não encontrada com esses parametros")
-        self.repository.delete_turma(turma)
+        await self.repository.delete_turma(turma)
