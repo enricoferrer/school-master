@@ -9,9 +9,9 @@ class UsuarioService():
     def __init__(self, repository: UsuarioRepository):
         self.repository = repository
         
-    def create(self, data: UsuarioCreate):
-        usuarioDuplicadoCpf = self.repository.get_usuario_by_cpf(data.cpf)
-        usuarioDuplicadoRg = self.repository.get_usuario_by_rg(data.registro_geral)
+    async def create(self, data: UsuarioCreate):
+        usuarioDuplicadoCpf = await self.repository.get_usuario_by_cpf(data.cpf)
+        usuarioDuplicadoRg = await self.repository.get_usuario_by_rg(data.registro_geral)
         
         if usuarioDuplicadoCpf:
             raise DuplicateFieldException(f"Usuário com esse CPF já existe!")
@@ -22,17 +22,17 @@ class UsuarioService():
         senha_criptada = hash_password(data.senha_hash)
         data.senha_hash = senha_criptada
 
-        return self.repository.create(data)
+        return await self.repository.create(data)
     
-    def list_usuarios(self):
-        return self.repository.list_usuarios()
+    async def list_usuarios(self):
+        return await self.repository.list_usuarios()
     
-    def get_usuario_by_id(self, id: UUID):
-        usuario = self.repository.get_usuario_by_id(id)
+    async def get_usuario_by_id(self, id: UUID):
+        usuario = await self.repository.get_usuario_by_id(id)
         if usuario is None:
             raise NotFoundException(f"Usuario com o ID: '{id} não foi encontrado!")
         return usuario
     
-    def delete_usuario_by_id(self, id: UUID):
-        usuario = self.get_usuario_by_id(id)
-        self.repository.delete_usuario(usuario)
+    async def delete_usuario_by_id(self, id: UUID):
+        usuario = await self.get_usuario_by_id(id)
+        await self.repository.delete_usuario(usuario)
