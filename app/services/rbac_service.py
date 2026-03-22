@@ -8,54 +8,38 @@ from sqlalchemy import select
 from app.core.redis_client import get_redis
 from app.core.permissions import ROLE_PERMISSIONS
 from app.models.role_permissions import RolePermission
+from app.repositories.role_permission_repository import RolePermissionRepository
 
 logger = logging.getLogger(__name__)
 
 PERMISSIONS_CACHE_TTL = 300  # 5 minutos (US-002)
 
 
-async def get_permissions_for_role(role_name: str, db: AsyncSession) -> Set[str]:
-    """
-    Busca permissões do papel com cache Redis.
-
-    Fluxo:
-      1. GET redis key → se existe, retorna deserializado
-      2. Se miss → SELECT no banco
-      3. SETEX no Redis com TTL 5min
-      4. Retorna o set de permissões
-    """
-    redis = await get_redis()
+async def get_permissions_for_role(
+    role_name: str,
+    repo: RolePermissionRepository,
+) -> Set[str]:
+    redis     = await get_redis()
     cache_key = f"rbac:perms:{role_name.upper()}"
 
-    # ── 1. Tenta cache ────────────────────────────────────────
+    # ── 1. Cache ──────────────────────────────────────────────
     try:
         cached = await redis.get(cache_key)
         if cached:
-            print("RBAC cache hit | role=%s", role_name)
             logger.info("RBAC cache hit | role=%s", role_name)
             return set(json.loads(cached))
     except Exception as exc:
-        # Redis indisponível não deve derrubar a API
-        print("Erro ao ler cache Redis, usando DB. Erro: %s", exc)
-        logger.info("Erro ao ler cache Redis, usando DB. Erro: %s", exc)
+        logger.warning("Redis indisponível, usando DB. Erro: %s", exc)
 
-    # ── 2. Fallback: banco de dados ───────────────────────────
-    from app.models.role import Role  # import local para evitar circular
+    # ── 2. Fallback: repositório ──────────────────────────────
+    permissions = await repo.get_permissions_by_role_name(role_name)
+    logger.info("RBAC DB query | role=%s | count=%d", role_name, len(permissions))
 
-    result = await db.execute(
-        select(RolePermission.permission)
-        .join(Role, Role.id == RolePermission.fk_role)
-        .where(Role.nome == role_name.upper())
-    )
-    permissions: Set[str] = {row[0] for row in result.all()}
-
-    logger.info("RBAC DB query | role=%s | permissions=%d", role_name, len(permissions))
-
-    # ── 3. Persiste no cache ──────────────────────────────────
+    # ── 3. Grava no cache ─────────────────────────────────────
     try:
         await redis.setex(cache_key, PERMISSIONS_CACHE_TTL, json.dumps(list(permissions)))
     except Exception as exc:
-        logger.info("Erro ao gravar cache Redis. Erro: %s", exc)
+        logger.warning("Erro ao gravar cache Redis. Erro: %s", exc)
 
     return permissions
 

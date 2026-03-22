@@ -10,6 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import decode_token
 from app.core.database import get_db          # ajuste o import conforme seu projeto
+from app.repositories.audit_repository import AuditRepository
+from app.repositories.role_permission_repository import RolePermissionRepository
 from app.services.rbac_service import get_permissions_for_role
 
 logger = logging.getLogger(__name__)
@@ -24,7 +26,14 @@ class TokenData:
     def __init__(self, user_id: str, role: str) -> None:
         self.user_id = user_id
         self.role    = role
+        
+# ── Factories de repositórios ─────────────────────────────────────────────────
 
+def get_role_permission_repo(db: AsyncSession = Depends(get_db)) -> RolePermissionRepository:
+    return RolePermissionRepository(db)
+
+def get_audit_repo(db: AsyncSession = Depends(get_db)) -> AuditRepository:
+    return AuditRepository(db)
 
 # ── Dependência 1: autenticação ──────────────────────────────────────────────
 
@@ -73,15 +82,16 @@ def require_permission(permission: str):
     async def _guard(
         request: Request,
         current_user: TokenData = Depends(get_current_user),
-        db: AsyncSession       = Depends(get_db),
+        perm_repo:         RolePermissionRepository = Depends(get_role_permission_repo),
+        audit_repo:        AuditRepository          = Depends(get_audit_repo),
     ) -> TokenData:
 
-        permissions = await get_permissions_for_role(current_user.role, db)
+        permissions = await get_permissions_for_role(current_user.role, perm_repo)
 
         if permission not in permissions:
             # ── Grava audit_log ANTES de retornar 403 ────────────────
             await _write_access_denied_log(
-                db             = db,
+                audit_repo     = audit_repo,
                 user_id        = current_user.user_id,
                 role           = current_user.role,
                 permission_req = permission,
@@ -110,7 +120,7 @@ def require_permission(permission: str):
 # ── Helper interno ────────────────────────────────────────────────────────────
 
 async def _write_access_denied_log(
-    db: AsyncSession,
+    audit_repo: AuditRepository,
     user_id: str,
     role: str,
     permission_req: str,
@@ -123,25 +133,22 @@ async def _write_access_denied_log(
     try:
         from app.models.audit_log import AuditLog  # import local para evitar circular
 
-        log_entry = AuditLog(
-            fk_usuario       = UUID(user_id),
-            operacao         = "ACCESS_DENIED",
-            tabela_afetada   = "endpoint",
-            dados_posteriores= {
+        await audit_repo.registrar_log(AuditLog(
+            fk_usuario        = UUID(user_id),
+            operacao          = "ACCESS_DENIED",
+            tabela_afetada    = "endpoint",
+            dados_posteriores = {
                 "role"               : role,
                 "permission_required": permission_req,
                 "endpoint"           : endpoint,
                 "method"             : method,
                 "timestamp"          : datetime.now(timezone.utc).isoformat(),
             },
-            ip_origem        = ip,
-            user_agent       = user_agent,
-        )
-        db.add(log_entry)
-        await db.commit()
+            ip_origem         = ip,
+            user_agent        = user_agent,
+        ))
     except Exception as exc:
         logger.error("Falha ao gravar audit_log de ACCESS_DENIED: %s", exc)
-        await db.rollback()
 
 
 # ── Alias tipado para uso nos handlers ────────────────────────────────────────
