@@ -5,7 +5,7 @@ from app.exceptions.WrongPasswordException import WrongPasswordException
 from app.exceptions.BlockedAccountException import BlockedAccountException
 from app.exceptions.InvalidTokenException import InvalidTokenException
 from app.exceptions.InactiveUserException import InactiveUserException
-from app.repositories.audit_repository import AuditRepository
+from app.repositories.audit_log_repository import AuditLogRepository
 from app.repositories.role_repository import RoleRepository
 from app.repositories.usuario_repository import UsuarioRepository
 from app.schemas.auth import LoginRequest, TokenResponse, RefreshRequest
@@ -15,7 +15,7 @@ from app.core.database import get_db
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
 
 def get_service(db: AsyncSession = Depends(get_db)):
-    audit_repository = AuditRepository(db)
+    audit_repository = AuditLogRepository(db)
     usuario_repository = UsuarioRepository(db)
     role_repository = RoleRepository(db)
     return AuthService(audit_repository, usuario_repository, role_repository)

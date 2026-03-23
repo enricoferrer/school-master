@@ -5,7 +5,7 @@ from app.core.database import get_db
 from app.dependencies.auth import require_permission
 from app.repositories.usuario_repository import UsuarioRepository
 from app.repositories.role_repository import RoleRepository
-from app.repositories.audit_repository import AuditRepository
+from app.repositories.audit_log_repository import AuditLogRepository
 from app.schemas.rbac import RoleAssignRequest, RoleAssignResponse, RoleRevokeResponse
 from app.services.rbac_admin_service import RbacAdminService
 from app.exceptions.EntityNotFoundException import EntityNotFoundException
@@ -18,7 +18,7 @@ def get_rbac_admin_service(db: AsyncSession = Depends(get_db)) -> RbacAdminServi
     return RbacAdminService(
         usuario_repo = UsuarioRepository(db),
         role_repo    = RoleRepository(db),
-        audit_repo   = AuditRepository(db),
+        audit_repo   = AuditLogRepository(db),
     )
 
 

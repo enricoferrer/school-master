@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import decode_token
 from app.core.database import get_db          # ajuste o import conforme seu projeto
-from app.repositories.audit_repository import AuditRepository
+from app.repositories.audit_log_repository import AuditLogRepository
 from app.repositories.role_permission_repository import RolePermissionRepository
 from app.services.rbac_service import get_permissions_for_role
 
@@ -32,8 +32,8 @@ class TokenData:
 def get_role_permission_repo(db: AsyncSession = Depends(get_db)) -> RolePermissionRepository:
     return RolePermissionRepository(db)
 
-def get_audit_repo(db: AsyncSession = Depends(get_db)) -> AuditRepository:
-    return AuditRepository(db)
+def get_audit_repo(db: AsyncSession = Depends(get_db)) -> AuditLogRepository:
+    return AuditLogRepository(db)
 
 # ── Dependência 1: autenticação ──────────────────────────────────────────────
 
@@ -83,7 +83,7 @@ def require_permission(permission: str):
         request: Request,
         current_user: TokenData = Depends(get_current_user),
         perm_repo:         RolePermissionRepository = Depends(get_role_permission_repo),
-        audit_repo:        AuditRepository          = Depends(get_audit_repo),
+        audit_repo:        AuditLogRepository          = Depends(get_audit_repo),
     ) -> TokenData:
 
         permissions = await get_permissions_for_role(current_user.role, perm_repo)
@@ -120,7 +120,7 @@ def require_permission(permission: str):
 # ── Helper interno ────────────────────────────────────────────────────────────
 
 async def _write_access_denied_log(
-    audit_repo: AuditRepository,
+    audit_repo: AuditLogRepository,
     user_id: str,
     role: str,
     permission_req: str,
