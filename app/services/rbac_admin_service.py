@@ -6,7 +6,7 @@ from fastapi import HTTPException, status
 
 from app.repositories.usuario_repository import UsuarioRepository
 from app.repositories.role_repository import RoleRepository
-from app.repositories.audit_repository import AuditRepository
+from app.repositories.audit_log_repository import AuditLogRepository
 from app.models.audit_log import AuditLog
 from app.schemas.rbac import RoleAssignRequest, RoleAssignResponse, RoleRevokeResponse
 from app.services.rbac_service import invalidate_role_cache
@@ -24,7 +24,7 @@ class RbacAdminService:
         self,
         usuario_repo: UsuarioRepository,
         role_repo:    RoleRepository,
-        audit_repo:   AuditRepository,
+        audit_repo:   AuditLogRepository,
     ) -> None:
         self.usuario_repo = usuario_repo
         self.role_repo    = role_repo

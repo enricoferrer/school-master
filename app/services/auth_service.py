@@ -13,7 +13,7 @@ from app.models.audit_log import AuditLog
 from app.exceptions.WrongPasswordException import WrongPasswordException
 from app.exceptions.InvalidTokenException import InvalidTokenException
 from app.exceptions.BlockedAccountException import BlockedAccountException
-from app.repositories.audit_repository import AuditRepository
+from app.repositories.audit_log_repository import AuditLogRepository
 from app.core.security import verify_password, create_access_token, create_refresh_token, decode_token
 from app.core.config import settings
 from app.repositories.role_repository import RoleRepository
@@ -28,7 +28,7 @@ REFRESH_TOKEN_PREFIX = "refresh:"
 class AuthService:
     def __init__(
         self,
-        audit_repository:   AuditRepository,
+        audit_repository:   AuditLogRepository,
         usuario_repository: UsuarioRepository,
         role_repository:    RoleRepository,
     ):
