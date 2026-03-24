@@ -43,12 +43,18 @@ class Permission(str, Enum):
     # Funcionários
     FUNCIONARIO_READ  = "funcionario:read"
     FUNCIONARIO_WRITE = "funcionario:write"
-
+    
+    #Analytics
+    ANALYTICS_READ    = "analytics:read"
+    ANALYTICS_WRITE   = "analytics:write"
+    
+    #Audit
+    AUDIT_READ       = "audit:read"
 
 # Mapeamento papel → conjunto de permissões
 # Esta estrutura é semeada no banco em startup e cacheada no Redis
 ROLE_PERMISSIONS: Dict[str, Set[str]] = {
-    "ADMIN": {p.value for p in Permission},  # tudo
+    "ADMIN": {p.value for p in Permission},
 
     "DIRETOR": {
         Permission.USER_READ,
@@ -63,12 +69,13 @@ ROLE_PERMISSIONS: Dict[str, Set[str]] = {
         Permission.NOTIFICACAO_READ,
         Permission.NOTIFICACAO_WRITE,
         Permission.FUNCIONARIO_READ,
+        Permission.ANALYTICS_READ,
+        Permission.ANALYTICS_WRITE,
     },
 
     "PROFESSOR": {
-        # SEM financeiro:read/write — regra explícita da US-002
-        Permission.ALUNO_READ,          # row-level: apenas alunos da sua turma
-        Permission.GRADE_READ,          # row-level: apenas notas da sua turma
+        Permission.ALUNO_READ,          
+        Permission.GRADE_READ,          
         Permission.GRADE_WRITE,
         Permission.FREQUENCIA_READ,
         Permission.FREQUENCIA_WRITE,
@@ -77,21 +84,20 @@ ROLE_PERMISSIONS: Dict[str, Set[str]] = {
     },
 
     "RESPONSAVEL": {
-        Permission.ALUNO_READ,          # row-level: apenas seus filhos
+        Permission.ALUNO_READ,          
         Permission.GRADE_READ,
         Permission.FREQUENCIA_READ,
-        Permission.FINANCEIRO_READ,     # row-level: apenas suas faturas
+        Permission.FINANCEIRO_READ,     
         Permission.CALENDARIO_READ,
         Permission.NOTIFICACAO_READ,
     },
 
     "ALUNO": {
-        Permission.GRADE_READ,          # row-level: apenas suas notas
+        Permission.GRADE_READ,          
         Permission.FREQUENCIA_READ,
         Permission.CALENDARIO_READ,
         Permission.NOTIFICACAO_READ,
     },
 }
 
-# Papéis válidos para validação de input
 VALID_ROLES = set(ROLE_PERMISSIONS.keys())
