@@ -1,8 +1,10 @@
 import logging
+import os
 import uuid
 from datetime import date
 from uuid import UUID
 
+from app.core import config
 from app.models.frequencia import Frequencia
 from app.repositories.aluno_repository import AlunoRepository
 from app.repositories.disciplina_repository import DisciplinaRepository
@@ -14,7 +16,7 @@ from app.schemas.frequencia import FrequenciaCreate
 
 logger = logging.getLogger("attendance")
 
-FREQUENCIA_MINIMA = 75.0
+FREQUENCIA_MINIMA = config.Settings().FREQUENCIA_MINIMA
 
 
 class FrequenciaService:

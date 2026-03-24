@@ -22,6 +22,9 @@ class Settings(BaseSettings):
  
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
+    
+    # Frequencia
+    FREQUENCIA_MINIMA: float = 75.0
  
     class Config:
         env_file = ".env"
