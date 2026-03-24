@@ -28,3 +28,5 @@ class Usuario(Base):
     funcionario = relationship("Funcionario", back_populates="usuario", cascade="all, delete")
     aluno = relationship("Aluno", back_populates="usuario", cascade="all, delete-orphan")
     role = relationship("Role", back_populates="usuarios", foreign_keys=[fk_role])
+    alunos_responsavel = relationship("AlunoResponsavel", back_populates="responsavel", cascade="all, delete-orphan"
+)
