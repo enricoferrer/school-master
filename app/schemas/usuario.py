@@ -22,7 +22,20 @@ class UsuarioModel(BaseModel):
     email: EmailStr
     endereco: str
     telefone: str
+
+class UsuarioCreate(UsuarioModel):
+    senha_hash: str
     
+    
+    @field_validator("cpf")
+    @classmethod
+    def val_cpf(cls, v): return validate_cpf(v)
+
+    @field_validator("telefone")
+    @classmethod
+    def val_telefone(cls, v): return validate_telefone(v)
+    
+        
     @field_validator("nome_completo", "registro_geral", "genero", "endereco")
     @classmethod
     def val_not_empty(cls, v): return not_empty(v)
@@ -31,21 +44,9 @@ class UsuarioModel(BaseModel):
     @classmethod
     def val_nome_social(cls, v): return nome_social_strip(v)
 
-    @field_validator("cpf")
-    @classmethod
-    def val_cpf(cls, v): return validate_cpf(v)
-
-    @field_validator("telefone")
-    @classmethod
-    def val_telefone(cls, v): return validate_telefone(v)
-
     @field_validator("data_nascimento")
     @classmethod
     def val_data_nascimento(cls, v): return validate_data_nascimento(v)
-
-
-class UsuarioCreate(UsuarioModel):
-    senha_hash: str
     
 class UsuarioResponse(UsuarioModel):
     id: UUID
