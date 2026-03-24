@@ -8,3 +8,6 @@ from app.models.turma_professores import TurmaProfessores
 from app.models.aluno import Aluno
 from app.models.role import Role
 from app.models.audit_log import AuditLog
+from app.models.frequencia import Frequencia
+from app.models.role_permissions import RolePermission
+from app.models.aluno_responsavel import AlunoResponsavel

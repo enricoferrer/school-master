@@ -17,3 +17,4 @@ class TurmaProfessores(Base):
     turma = relationship("Turma", back_populates="turma_professores", foreign_keys=[fk_turma])
     professor = relationship("Professor", back_populates="turma_professores", foreign_keys=[fk_professor])
     disciplina = relationship("Disciplina", back_populates="turma_professores", foreign_keys=[fk_disciplina])
+    frequencia = relationship("Frequencia", back_populates="turma_professores", cascade="all, delete-orphan", passive_deletes=True)
