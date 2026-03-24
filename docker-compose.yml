@@ -1,4 +1,5 @@
 version: "3.8"
+
 services:
   db:
     image: postgres:16-alpine
@@ -34,6 +35,7 @@ services:
   app:
     build: .
     container_name: schoolmaster_app
+    entrypoint: ["python", "/entrypoint.py"]  # ✅ só aqui
     depends_on:
       db:
         condition: service_healthy
@@ -49,6 +51,32 @@ services:
       REDIS_URL: redis://:redispass@redis:6379/0
     ports:
       - "8000:8000"
+
+  celery_worker:
+    build: .
+    container_name: schoolmaster_celery_worker
+    command: celery -A app.core.celery worker --loglevel=info
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://user:password@db:5432/school_master
+      REDIS_URL: redis://:redispass@redis:6379/0
+    volumes:
+      - .:/app
+
+  flower:
+    build: .
+    container_name: schoolmaster_flower
+    command: celery -A app.core.celery flower --port=5555
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+    environment:
+      REDIS_URL: redis://:redispass@redis:6379/0
 
 volumes:
   postgres_data:

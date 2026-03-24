@@ -4,7 +4,11 @@ from datetime import date
 from uuid import UUID
 
 from app.models.frequencia import Frequencia
+from app.repositories.aluno_repository import AlunoRepository
+from app.repositories.disciplina_repository import DisciplinaRepository
 from app.repositories.frequencia_repository import FrequenciaRepository
+from app.repositories.turma_professores_repository import TurmaProfessoresRepository
+from app.repositories.turma_repository import TurmaRepository
 from app.tasks.attendance_tasks import alertar_frequencia_critica
 from app.schemas.frequencia import FrequenciaCreate
 
@@ -14,8 +18,12 @@ FREQUENCIA_MINIMA = 75.0
 
 
 class FrequenciaService:
-    def __init__(self, repo: FrequenciaRepository):
+    def __init__(self, repo: FrequenciaRepository, alunoRepo: AlunoRepository, disciplinaRepo: DisciplinaRepository, turmaProfessorRepo: TurmaProfessoresRepository, turmaRepo: TurmaRepository):
         self.repo = repo
+        self.alunoRepo = alunoRepo
+        self.disciplinaRepo = disciplinaRepo
+        self.turmaProfessorRepo = turmaProfessorRepo
+        self.turmaRepo = turmaRepo
 
     # ── Registro de presença ──────────────────────────────────────────────────
 
@@ -72,28 +80,35 @@ class FrequenciaService:
             aluno_id=aluno_id,
             turma_professor_id=turma_professor_id,
         )
+        
+        turma_professor = await self.turmaProfessorRepo.get_vinculo_by_id(turma_professor_id)
+        disciplina = await self.disciplinaRepo.get_disciplina_by_id(turma_professor.fk_disciplina)
+        turma = await self.turmaRepo.get_turma_by_id(turma_professor.fk_turma)
 
         if stats["total_aulas"] < 5:
             return
 
         if stats["percentual"] < FREQUENCIA_MINIMA:
             responsaveis = await self.repo.buscar_responsaveis(aluno_id)
+            aluno = await self.alunoRepo.get_aluno_by_id(aluno_id)
 
             alertar_frequencia_critica.delay(
                 aluno_id=str(aluno_id),
-                aluno_nome="N/D",
-                disciplina_nome="N/D",
-                turma_id=str(turma_professor_id),
+                aluno_nome=aluno.usuario.nome_completo,
+                disciplina_nome=disciplina.nome,
+                turma_id=str(turma.id),
                 frequencia_atual=stats["percentual"],
                 responsaveis=responsaveis,
             )
 
             logger.warning(
-                "Frequência crítica enfileirada para alerta",
+                "frequencia_critica",
                 extra={
-                    "aluno_id": str(aluno_id),
+                    "aluno": aluno.usuario.nome_completo,
+                    "disciplina": disciplina.nome,
                     "frequencia": stats["percentual"],
-                    "total_aulas": stats["total_aulas"],
+                    "turma": turma.id,
+                    "responsaveis": responsaveis,
                 },
             )
 
