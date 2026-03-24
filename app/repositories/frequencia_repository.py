@@ -176,28 +176,36 @@ class FrequenciaRepository:
     # ── Tendência de frequência (para gráficos/relatórios) ───────────────────
 
     async def tendencia_frequencia_por_turma(
-        self,
-        data_inicio: date,
-        data_fim: date,
-    ) -> list[dict]:
+    self,
+    data_inicio: date,
+    data_fim: date,
+) -> list[dict]:
+
+        semana = func.date_trunc("week", Frequencia.data)
+
         query = (
             select(
                 TurmaProfessores.fk_turma.label("turma_id"),
-                func.date_trunc("week", Frequencia.data).label("semana"),
+                semana.label("semana"),
                 func.count(Frequencia.id).label("total"),
                 func.sum(
                     case((Frequencia.presenca == True, 1), else_=0)
                 ).label("presencas"),
             )
             .join(TurmaProfessores, TurmaProfessores.id == Frequencia.fk_turma_professor)
-            .where(and_(Frequencia.data >= data_inicio, Frequencia.data <= data_fim))
+            .where(
+                and_(
+                    Frequencia.data >= data_inicio,
+                    Frequencia.data <= data_fim
+                )
+            )
             .group_by(
                 TurmaProfessores.fk_turma,
-                func.date_trunc("week", Frequencia.data),
+                semana 
             )
             .order_by(
                 TurmaProfessores.fk_turma,
-                func.date_trunc("week", Frequencia.data),
+                semana 
             )
         )
 
