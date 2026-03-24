@@ -22,6 +22,7 @@ _pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ADMIN_ID       = str(uuid.uuid4())
 ADMIN_EMAIL    = "admin@schoolmaster.com"
 ADMIN_SENHA    = "Admin@1234!"
+ADMIN_TELEFONE = "11999999999"
 ADMIN_GENERO   = "MAS"     
 ADMIN_CPF      = "00000000000"
 ADMIN_ENDERECO = "ENDERECO_ADMIN"
@@ -60,11 +61,11 @@ def upgrade() -> None:
         text("""
             INSERT INTO usuarios (
                 id, fk_role, nome_completo, email, senha_hash,
-                cpf,registro_geral, genero, endereco, data_nascimento, is_active,
+                cpf,registro_geral, genero, endereco, data_nascimento, telefone, is_active,
                 tentativas_falhas, criado_em, atualizado_em
             ) VALUES (
                 :id, :fk_role, :nome_completo, :email, :senha_hash,
-                :cpf, :registro_geral, :genero, :endereco, :data_nascimento, true,
+                :cpf, :registro_geral, :genero, :endereco, :data_nascimento, :telefone, true,
                 0, NOW(), NOW()
             )
         """),
@@ -79,6 +80,7 @@ def upgrade() -> None:
             "genero":          ADMIN_GENERO,
             "endereco":        ADMIN_ENDERECO,
             "data_nascimento": ADMIN_NASCIMENTO,
+            "telefone":        ADMIN_TELEFONE,
         },
     )
 
