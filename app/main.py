@@ -4,7 +4,7 @@ from fastapi.concurrency import asynccontextmanager
 from app.core.database import AsyncSessionLocal
 from app.core.redis_client import close_redis
 from app.middleware.audit_middleware import AuditMiddleware
-from app.routers import usuario_router
+from app.routers import analytics_router, frequencia_router, reports_router, usuario_router
 from app.routers import funcionario_router
 from app.routers import professor_router
 from app.routers import disciplina_router
@@ -44,3 +44,6 @@ app.include_router(aluno_router.router)
 app.include_router(auth_router.router)
 app.include_router(admin_roles_router.router)
 app.include_router(audit_log_router.router)
+app.include_router(frequencia_router.router)
+app.include_router(analytics_router.router)
+app.include_router(reports_router.router)
