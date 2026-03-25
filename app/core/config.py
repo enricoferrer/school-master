@@ -25,7 +25,11 @@ class Settings(BaseSettings):
     
     # Frequencia
     FREQUENCIA_MINIMA: float = 75.0
- 
+    
+    # Media para aprovação/reprovação
+    MEDIA_APROVADO: float    = 7.0
+    MEDIA_RECUPERACAO: float = 5.0
+    
     class Config:
         env_file = ".env"
         extra = "ignore"

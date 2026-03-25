@@ -18,5 +18,5 @@ class Aluno(Base):
     turma = relationship("Turma", back_populates="aluno", foreign_keys=[fk_turma])
     usuario = relationship("Usuario", back_populates="aluno", foreign_keys=[fk_usuario])
     frequencia = relationship("Frequencia", back_populates="aluno", cascade="all, delete-orphan", passive_deletes=True)
-    responsaveis = relationship("AlunoResponsavel", back_populates="aluno",cascade="all, delete-orphan"
-)
+    responsaveis = relationship("AlunoResponsavel", back_populates="aluno",cascade="all, delete-orphan")
+    notas = relationship("Nota", back_populates="aluno", cascade="all, delete-orphan", passive_deletes=True)

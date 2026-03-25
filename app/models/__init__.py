@@ -11,3 +11,5 @@ from app.models.audit_log import AuditLog
 from app.models.frequencia import Frequencia
 from app.models.role_permissions import RolePermission
 from app.models.aluno_responsavel import AlunoResponsavel
+from app.models.avaliacao import Avaliacao
+from app.models.nota import Nota
