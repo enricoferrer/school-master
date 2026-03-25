@@ -4,6 +4,7 @@ from sqlalchemy import UUID, Column, ForeignKey
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
+from app.models import avaliacao
 
 
 class TurmaProfessores(Base):
@@ -18,3 +19,4 @@ class TurmaProfessores(Base):
     professor = relationship("Professor", back_populates="turma_professores", foreign_keys=[fk_professor])
     disciplina = relationship("Disciplina", back_populates="turma_professores", foreign_keys=[fk_disciplina])
     frequencia = relationship("Frequencia", back_populates="turma_professores", cascade="all, delete-orphan", passive_deletes=True)
+    avaliacoes = relationship("Avaliacao", back_populates="turma_professores", cascade="all, delete-orphan", passive_deletes=True)
