@@ -6,8 +6,9 @@ from app.validators.common_validator import not_empty
 class TurmaModel(BaseModel):
     sala: str
     serie: str
+    ano_letivo: str
     
-    @field_validator("sala", "serie")
+    @field_validator("sala", "serie", "ano_letivo")
     @classmethod
     def val_not_empty(cls, v): return not_empty(v)
     
