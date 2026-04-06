@@ -28,26 +28,29 @@ _ROLE_PERMISSIONS = {
         "notificacao:read","notificacao:write",
         "funcionario:read","funcionario:write",
         "analytics:read","analytics:write",
-        "audit:read",
+        "audit:read", "portal:read",
     ],
     "DIRETOR": [
         "user:read","aluno:read","grade:read","frequencia:read",
         "financeiro:read","report:read","report:generate",
         "calendario:read","calendario:write",
         "notificacao:read","notificacao:write","funcionario:read",
-        "analytics:read",
+        "analytics:read", "portal:read",
     ],
     "PROFESSOR": [
         "aluno:read","grade:read","grade:write",
         "frequencia:read","frequencia:write",
         "calendario:read","notificacao:read",
+        "portal:read",
     ],
     "RESPONSAVEL": [
         "aluno:read","grade:read","frequencia:read",
         "financeiro:read","calendario:read","notificacao:read",
+        "portal:read",
     ],
     "ALUNO": [
         "grade:read","frequencia:read","calendario:read","notificacao:read",
+        "portal:read",
     ],
 }
 

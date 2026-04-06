@@ -28,5 +28,6 @@ class Usuario(Base):
     funcionario = relationship("Funcionario", back_populates="usuario", cascade="all, delete")
     aluno = relationship("Aluno", back_populates="usuario", cascade="all, delete-orphan")
     role = relationship("Role", back_populates="usuarios", foreign_keys=[fk_role])
-    alunos_responsavel = relationship("AlunoResponsavel", back_populates="responsavel", cascade="all, delete-orphan"
-)
+    alunos_responsavel = relationship("AlunoResponsavel", back_populates="responsavel", cascade="all, delete-orphan")
+    notificacoes_recebidas = relationship("Notificacao", back_populates="usuario_destino", cascade="all, delete-orphan")
+    notificacao_preferencias = relationship("NotificacaoPreferencia", back_populates="usuario", cascade="all, delete-orphan")

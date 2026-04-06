@@ -1,58 +1,68 @@
-#!/usr/bin/env python
+# entrypoint.py
 import os
-import sys
+import socket
 import subprocess
+import sys
 import time
 
-db_host = os.getenv("DB_HOST", "db")
-db_user = os.getenv("DB_USER", "user")
-db_pass = os.getenv("DB_PASS", "password")
-db_name = os.getenv("DB_NAME", "school_master")
-db_port = os.getenv("DB_PORT", "5432")
+PROJECT_DIR = os.getenv("PROJECT_DIR", "/app")
+MIGRATION_DIR = os.getenv("MIGRATION_DIR", "/app/alembic")
 
-print(f"[*] Aguardando database ({db_host}:{db_port}) estar pronto...")
+def wait_for_db(host: str, port: int, timeout: int = 60) -> None:
+    print(f"[*] Aguardando database ({host}:{port}) estar pronto...")
+    start = time.time()
+    while True:
+        try:
+            with socket.create_connection((host, port), timeout=2):
+                print("[✓] Database está pronto!")
+                return
+        except OSError:
+            if time.time() - start > timeout:
+                print(f"[✗] Timeout aguardando {host}:{port}")
+                sys.exit(1)
+            time.sleep(2)
 
-max_retries = 60
-retry = 0
 
-while retry < max_retries:
+def run_migrations() -> None:
+    print(f"[*] Executando migrations com Alembic (cwd={PROJECT_DIR})...")
+
+    ini_path = os.path.join(PROJECT_DIR, "alembic.ini")
+
+    if not os.path.exists(ini_path):
+        print(f"[✗] alembic.ini não encontrado em {ini_path}")
+        sys.exit(1)
+
     result = subprocess.run(
-        ["pg_isready", "-h", db_host, "-U", db_user, "-d", db_name, "-p", db_port],
-        capture_output=True,
-        env={**os.environ, "PGPASSWORD": db_pass},  # 🔥 FIX PRINCIPAL
+        ["alembic", "upgrade", "head"],
+        cwd=PROJECT_DIR,
     )
 
-    if result.returncode == 0:
-        print("[✓] Database está pronto!")
-        break
+    if result.returncode != 0:
+        print("[✗] Erro ao executar migrations!")
+        sys.exit(1)
 
-    retry += 1
-    print(f"[!] Database ainda não está pronto... ({retry}/{max_retries})")
-    time.sleep(2)
+    print("[✓] Migrations executadas com sucesso!")
 
-if retry == max_retries:
-    print("[✗] Timeout aguardando database!")
-    sys.exit(1)
 
-# migrations
-print("[*] Executando migrations com Alembic...")
-env = os.environ.copy()
-env["PYTHONPATH"] = "/app"
+def start_app() -> None:
+    print("[*] Iniciando aplicação...")
+    os.chdir(PROJECT_DIR)
+    os.execvp(
+        "uvicorn",
+        [
+            "uvicorn",
+            "app.main:app",
+            "--host", "0.0.0.0",
+            "--port", "8000",
+            "--workers", "1",
+        ],
+    )
 
-result = subprocess.run(
-    ["python", "-m", "alembic", "-c", "/app/alembic/alembic.ini", "upgrade", "head"],
-    env=env,
-)
 
-if result.returncode != 0:
-    print("[✗] Erro ao executar migrations!")
-    sys.exit(1)
+if __name__ == "__main__":
+    db_host = os.getenv("DB_HOST", "localhost")
+    db_port = int(os.getenv("DB_PORT", "5432"))
 
-print("[✓] Migrations executadas com sucesso!")
-
-# start app
-print("[*] Iniciando FastAPI com Uvicorn...")
-os.execvp(
-    "uvicorn",
-    ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"],
-)
+    wait_for_db(db_host, db_port)
+    run_migrations()
+    start_app()

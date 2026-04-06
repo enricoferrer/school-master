@@ -12,7 +12,7 @@ async def get_redis() -> aioredis.Redis:
     global _redis_client
     if _redis_client is None:
         _redis_client = aioredis.from_url(
-            settings.REDIS_URL,       # redis://:redispass@redis:6379/0
+            settings.redis_url,
             encoding="utf-8",
             decode_responses=True,
         )

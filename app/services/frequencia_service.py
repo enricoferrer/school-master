@@ -1,17 +1,18 @@
 import logging
-import os
 import uuid
 from datetime import date
 from uuid import UUID
 
 from app.core import config
+from app.models import disciplina
 from app.models.frequencia import Frequencia
 from app.repositories.aluno_repository import AlunoRepository
 from app.repositories.disciplina_repository import DisciplinaRepository
 from app.repositories.frequencia_repository import FrequenciaRepository
 from app.repositories.turma_professores_repository import TurmaProfessoresRepository
 from app.repositories.turma_repository import TurmaRepository
-from app.tasks.attendance_tasks import alertar_frequencia_critica
+from app.services.notificacao_service import NotificacaoService
+from app.tasks.attendance_tasks import alertar_frequencia_critica, alertar_falta
 from app.schemas.frequencia import FrequenciaCreate
 
 logger = logging.getLogger("attendance")
@@ -20,12 +21,13 @@ FREQUENCIA_MINIMA = config.Settings().FREQUENCIA_MINIMA
 
 
 class FrequenciaService:
-    def __init__(self, repo: FrequenciaRepository, alunoRepo: AlunoRepository, disciplinaRepo: DisciplinaRepository, turmaProfessorRepo: TurmaProfessoresRepository, turmaRepo: TurmaRepository):
+    def __init__(self, repo: FrequenciaRepository, alunoRepo: AlunoRepository, disciplinaRepo: DisciplinaRepository, turmaProfessorRepo: TurmaProfessoresRepository, turmaRepo: TurmaRepository, notificacaoService: NotificacaoService):
         self.repo = repo
         self.alunoRepo = alunoRepo
         self.disciplinaRepo = disciplinaRepo
         self.turmaProfessorRepo = turmaProfessorRepo
         self.turmaRepo = turmaRepo
+        self.notificacaoService = notificacaoService
 
     # ── Registro de presença ──────────────────────────────────────────────────
 
@@ -42,7 +44,6 @@ class FrequenciaService:
         )
 
         if existente:
-            # Correção de lançamento
             existente.presenca = body.presenca
             existente.metodo_registro = "MANUAL_CORRECAO"
 
@@ -61,6 +62,21 @@ class FrequenciaService:
             )
 
             frequencia = await self.repo.registrar(frequencia)
+            if not body.presenca:
+                aluno = await self.alunoRepo.get_aluno_by_id(body.aluno_id)
+                turma_professor = await self.turmaProfessorRepo.get_vinculo_by_id(body.turma_professor_id)
+                disciplina = await self.disciplinaRepo.get_disciplina_by_id(turma_professor.fk_disciplina)
+
+                responsaveis = await self.repo.buscar_responsaveis(body.aluno_id)
+
+                if responsaveis:
+                    alertar_falta.delay(
+                        aluno_id=str(body.aluno_id),
+                        aluno_nome=aluno.usuario.nome_completo,
+                        disciplina_nome=disciplina.nome,
+                        data_falta=str(body.data),
+                        responsaveis=responsaveis,
+                    )
 
         # Verifica alerta em background
         await self._verificar_alerta_frequencia(
@@ -93,6 +109,7 @@ class FrequenciaService:
         if stats["percentual"] < FREQUENCIA_MINIMA:
             responsaveis = await self.repo.buscar_responsaveis(aluno_id)
             aluno = await self.alunoRepo.get_aluno_by_id(aluno_id)
+            print(f"responsaveis: {responsaveis}")
 
             alertar_frequencia_critica.delay(
                 aluno_id=str(aluno_id),

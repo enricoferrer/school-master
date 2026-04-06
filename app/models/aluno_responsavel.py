@@ -28,6 +28,8 @@ class AlunoResponsavel(Base):
         default=False,
         server_default="false",
     )
+    
+    tipo_responsavel  = Column(String(20), nullable=False, default="PRIMARIO")
 
     # relationships
     aluno = relationship("Aluno", back_populates="responsaveis")

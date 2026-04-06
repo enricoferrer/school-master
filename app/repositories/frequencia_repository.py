@@ -81,13 +81,13 @@ class FrequenciaRepository:
 
     async def buscar_responsaveis(self, aluno_id: UUID) -> list[dict]:
         result = await self.db.execute(
-            select(Usuario.nome_completo, Usuario.email)
+            select(Usuario.id, Usuario.nome_completo, Usuario.email)
             .join(AlunoResponsavel, AlunoResponsavel.fk_responsavel == Usuario.id)
             .where(AlunoResponsavel.fk_aluno == aluno_id)
         )
 
         return [
-            {"nome": r.nome_completo, "email": r.email}
+            {"id": r.id, "nome": r.nome_completo, "email": r.email}
             for r in result.all()
         ]
 
