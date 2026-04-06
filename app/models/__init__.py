@@ -13,3 +13,5 @@ from app.models.role_permissions import RolePermission
 from app.models.aluno_responsavel import AlunoResponsavel
 from app.models.avaliacao import Avaliacao
 from app.models.nota import Nota
+from app.models.notificacao import Notificacao
+from app.models.notificacao_preferencia import NotificacaoPreferencia
