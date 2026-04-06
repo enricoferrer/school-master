@@ -12,7 +12,9 @@ from app.repositories.disciplina_repository import DisciplinaRepository
 from app.repositories.frequencia_repository import FrequenciaRepository
 from app.repositories.turma_professores_repository import TurmaProfessoresRepository
 from app.repositories.turma_repository import TurmaRepository
-from app.services.frequencia_service        import FrequenciaService
+from app.repositories.notificacao_repository import NotificacaoRepository
+from app.services.frequencia_service import FrequenciaService
+from app.services.notificacao_service import NotificacaoService
 from app.utils.pdf_generator                import gerar_pdf_frequencia
 
 router = APIRouter(prefix="/reports", tags=["Relatórios"])
@@ -24,8 +26,9 @@ def get_frequencia_service(db: AsyncSession = Depends(get_db)) -> FrequenciaServ
         AlunoRepository(db), 
         DisciplinaRepository(db), 
         TurmaProfessoresRepository(db),
-        TurmaRepository(db)
-        )
+        TurmaRepository(db),
+        NotificacaoService(NotificacaoRepository(db))
+    )
 
 
 @router.get("/attendance", response_class=Response)

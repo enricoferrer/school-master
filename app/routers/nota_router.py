@@ -8,8 +8,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database                 import get_db
 from app.dependencies.auth             import require_permission, TokenData
+from app.models.notificacao import Notificacao
 from app.repositories.aluno_repository import AlunoRepository
+from app.repositories.disciplina_repository import DisciplinaRepository
 from app.repositories.nota_repository import NotaRepository
+from app.repositories.notificacao_repository import NotificacaoRepository
+from app.repositories.turma_professores_repository import TurmaProfessoresRepository
 from app.schemas.nota                  import (
     NotaCreate, NotaUpdate, NotaResponse,
 )
@@ -18,12 +22,13 @@ from app.services.nota_service         import NotaService
 from app.exceptions.NotOwnerException import NotOwnerException
 from app.exceptions.NotFoundException import NotFoundException
 from app.exceptions.DuplicateFieldException import DuplicateFieldException
+from app.services.notificacao_service import NotificacaoService
 
 router = APIRouter(tags=["Notas & Avaliações"])
 
 
 def get_nota_service(db: AsyncSession = Depends(get_db)) -> NotaService:
-    return NotaService(NotaRepository(db), AlunoRepository(db))
+    return NotaService(NotaRepository(db), AlunoRepository(db), NotificacaoService(NotificacaoRepository(db)), DisciplinaRepository(db), TurmaProfessoresRepository(db))
 
 
 # ── Avaliações ────────────────────────────────────────────────────────────────
