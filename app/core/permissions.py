@@ -50,6 +50,9 @@ class Permission(str, Enum):
     
     #Audit
     AUDIT_READ       = "audit:read"
+    
+    # Portal do aluno
+    PORTAL_READ       = "portal:read"
 
 # Mapeamento papel → conjunto de permissões
 # Esta estrutura é semeada no banco em startup e cacheada no Redis
@@ -71,6 +74,7 @@ ROLE_PERMISSIONS: Dict[str, Set[str]] = {
         Permission.FUNCIONARIO_READ,
         Permission.ANALYTICS_READ,
         Permission.ANALYTICS_WRITE,
+        Permission.PORTAL_READ,
     },
 
     "PROFESSOR": {
@@ -81,6 +85,7 @@ ROLE_PERMISSIONS: Dict[str, Set[str]] = {
         Permission.FREQUENCIA_WRITE,
         Permission.CALENDARIO_READ,
         Permission.NOTIFICACAO_READ,
+        Permission.PORTAL_READ,
     },
 
     "RESPONSAVEL": {
@@ -90,6 +95,8 @@ ROLE_PERMISSIONS: Dict[str, Set[str]] = {
         Permission.FINANCEIRO_READ,     
         Permission.CALENDARIO_READ,
         Permission.NOTIFICACAO_READ,
+        Permission.NOTIFICACAO_WRITE,
+        Permission.PORTAL_READ,
     },
 
     "ALUNO": {
@@ -97,6 +104,7 @@ ROLE_PERMISSIONS: Dict[str, Set[str]] = {
         Permission.FREQUENCIA_READ,
         Permission.CALENDARIO_READ,
         Permission.NOTIFICACAO_READ,
+        Permission.PORTAL_READ,
     },
 }
 

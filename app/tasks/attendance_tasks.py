@@ -1,61 +1,15 @@
-"""
-Tarefas Celery para alertas de frequência.
-
-Rodar o worker com:
-    celery -A app.core.celery worker --loglevel=info
-"""
+from app.tasks.notificacao_tasks import disparar_notificacao, processar_notificacao
 import logging
-import asyncio
-from typing import List, Dict
-
-from app.core.celery import celery_app
+from app.core.celery   import celery_app
 
 logger = logging.getLogger("attendance.alerts")
-
-
-async def processar_alerta_frequencia(
-    aluno_id: str,
-    aluno_nome: str,
-    disciplina_nome: str,
-    turma_id: str,
-    frequencia_atual: float,
-    responsaveis: List[Dict],
-):
-    nomes_responsaveis = ", ".join(
-        [r.get("nome", "N/D") for r in responsaveis]
-    ) or "N/D"
-
-    logger.warning(
-        f"🚨 ALERTA DE FREQUÊNCIA\n"
-        f"Aluno: {aluno_nome}\n"
-        f"Disciplina: {disciplina_nome}\n"
-        f"Frequência: {frequencia_atual:.1f}% (mínimo: 75%)\n"
-        f"Turma: {turma_id}\n"
-        f"Responsáveis: {nomes_responsaveis}"
-    )
-
-    logger.warning(
-        "frequencia_critica",
-        extra={
-            "alert_type": "frequencia_abaixo_minimo",
-            "aluno_id": aluno_id,
-            "aluno_nome": aluno_nome,
-            "disciplina": disciplina_nome,
-            "turma_id": turma_id,
-            "frequencia_atual": frequencia_atual,
-            "minimo_legal": 75,
-            "responsaveis": responsaveis,
-        },
-    )
 
 @celery_app.task(
     name="tasks.alertar_frequencia_critica",
     bind=True,
     max_retries=3,
     default_retry_delay=60,
-    autoretry_for=(Exception,),
-    retry_backoff=True,          
-    retry_jitter=True,           
+    queue="attendance",
 )
 def alertar_frequencia_critica(
     self,
@@ -64,34 +18,114 @@ def alertar_frequencia_critica(
     disciplina_nome: str,
     turma_id: str,
     frequencia_atual: float,
-    responsaveis: List[Dict],
+    responsaveis: list[dict],
 ) -> None:
     """
-    Task síncrona que executa lógica async com segurança.
+    Alerta sobre frequência crítica de um aluno.
+    ⚠️  IMPORTANTE: Task SÍNCRONA que dispara outras tasks async
     """
+
     try:
-        logger.info(
-            f"[TASK START] Alerta frequência | aluno={aluno_nome} ({aluno_id})"
+        logger.warning(
+            "🚨 ALERTA DE FREQUÊNCIA CRÍTICA",
+            extra={
+                "task_id": self.request.id,
+                "aluno_id": aluno_id,
+                "frequencia": frequencia_atual,
+                "responsaveis_count": len(responsaveis),
+            },
         )
 
-        asyncio.run(
-            processar_alerta_frequencia(
-                aluno_id=aluno_id,
-                aluno_nome=aluno_nome,
-                disciplina_nome=disciplina_nome,
-                turma_id=turma_id,
-                frequencia_atual=frequencia_atual,
-                responsaveis=responsaveis,
-            )
-        )
+        for resp in responsaveis:
+            usuario_id = resp.get("id") or resp.get("usuario_id")
+            email = resp.get("email")
 
-        logger.info(
-            f"[TASK SUCCESS] Alerta enviado | aluno={aluno_nome} ({aluno_id})"
-        )
+            if usuario_id is None or email is None:
+                logger.error(f"Responsável inválido (id={usuario_id}, email={email}), pulando...")
+                continue
+
+            try:
+                disparar_notificacao.delay(
+                    usuario_id=str(usuario_id),
+                    email_destino=email,
+                    tipo_evento="FREQUENCIA_CRITICA",
+                    titulo="Alerta de Frequência Crítica",
+                    mensagem=(
+                        f"O aluno {aluno_nome} está com frequência crítica "
+                        f"na disciplina {disciplina_nome} ({frequencia_atual:.1f}%)."
+                    ),
+                )
+                logger.info(f"✅ Notificação enfileirada para {email}")
+            except Exception as inner_exc:
+                logger.error(f"Erro ao enfileirar notificação: {inner_exc}", exc_info=True)
+                # Não falha a task inteira, continua com próximos responsáveis
 
     except Exception as exc:
         logger.error(
-            f"[TASK ERROR] Falha no alerta | aluno={aluno_nome} ({aluno_id})",
+            "❌ Erro na alertar_frequencia_critica",
             exc_info=True,
         )
-        raise exc 
+        raise self.retry(exc=exc)
+
+
+@celery_app.task(
+    name="tasks.alertar_falta",
+    bind=True,
+    max_retries=3,
+    default_retry_delay=60,
+    queue="attendance",
+)
+def alertar_falta(
+    self,
+    aluno_id: str,
+    aluno_nome: str,
+    disciplina_nome: str,
+    data_falta: str,
+    responsaveis: list[dict],
+) -> None:
+    """
+    Alerta sobre registro de falta de um aluno.
+    ⚠️  IMPORTANTE: Task SÍNCRONA que dispara outras tasks async
+    """
+
+    try:
+        logger.info(
+            "⚠️ ALERTA DE FALTA REGISTRADA",
+            extra={
+                "task_id": self.request.id,
+                "aluno_id": aluno_id,
+                "data": data_falta,
+                "responsaveis_count": len(responsaveis),
+            },
+        )
+
+        for resp in responsaveis:
+            usuario_id = resp.get("id") or resp.get("usuario_id")
+            email = resp.get("email")
+
+            if usuario_id is None or email is None:
+                logger.error(f"Responsável inválido (id={usuario_id}, email={email}), pulando...")
+                continue
+
+            try:
+                disparar_notificacao.delay(
+                    usuario_id=str(usuario_id),
+                    email_destino=email,
+                    tipo_evento="FALTA",
+                    titulo="Registro de Falta",
+                    mensagem=(
+                        f"Uma falta foi registrada para o aluno {aluno_nome} "
+                        f"em {data_falta} na disciplina {disciplina_nome}."
+                    ),
+                )
+                logger.info(f"✅ Notificação de falta enfileirada para {email}")
+            except Exception as inner_exc:
+                logger.error(f"Erro ao enfileirar notificação de falta: {inner_exc}", exc_info=True)
+                # Não falha a task inteira, continua com próximos responsáveis
+
+    except Exception as exc:
+        logger.error(
+            "❌ Erro na alertar_falta",
+            exc_info=True,
+        )
+        raise self.retry(exc=exc)
